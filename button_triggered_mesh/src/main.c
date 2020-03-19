@@ -7,6 +7,7 @@
  */
 
 #include <sys/printk.h>
+#include <stdio.h>
 
 #include <settings/settings.h>
 
@@ -14,6 +15,11 @@
 #include <bluetooth/mesh.h>
 
 #include "gpio.h"
+#include "display.h"
+
+#if !defined(NODE_ADDR)
+#define NODE_ADDR 0x0b0c
+#endif
 
 #define MOD_LF 0x0000
 
@@ -34,25 +40,34 @@ static const u8_t app_key[16] = {
 	0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
 	0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
 };
+
 static const u16_t net_idx;
 static const u16_t app_idx;
 static const u32_t iv_index;
 static u8_t flags;
 static u16_t addr = NODE_ADDR;
 
+static char center_message[40] = {0};
+static char hop_message[20] = {0};
+static K_SEM_DEFINE(semaphore, 0, 1);
+
+
+static void display(char *str)
+{
+	sprintf(center_message, "%s", str);
+	k_sem_give(&semaphore);
+}
+
 static void heartbeat(u8_t hops, u16_t feat)
 {
 	printk("Heartbeat arrived with %u hops.\n", hops);
+	sprintf(hop_message, "Hops: %d", hops);
+	display_set_bottom_label(hop_message);
 }
 
 static struct bt_mesh_cfg_srv cfg_srv = {
-#if defined(CONFIG_BOARD_BBC_MICROBIT)
-	.relay = BT_MESH_RELAY_ENABLED,
-	.beacon = BT_MESH_BEACON_DISABLED,
-#else
 	.relay = BT_MESH_RELAY_ENABLED,
 	.beacon = BT_MESH_BEACON_ENABLED,
-#endif
 	.frnd = BT_MESH_FRIEND_NOT_SUPPORTED,
 	.default_ttl = 7,
 
@@ -103,10 +118,14 @@ static void message_received(struct bt_mesh_model *model,
 		printk("Ignored message as 0x%04x is our own address.\n", bt_mesh_model_elem(model)->addr);
 		return;
 	}
+
+	/* Does not work yet
 	printk("Message is ");
 	for (int i=0; i < buf->len; i++)
 		printk("%x", buf->data[i]);
 	printk("\n");
+	display(buf->data);
+	*/
 }
 
 static const struct bt_mesh_model_op vnd_ops[] = {
@@ -275,24 +294,17 @@ void on_button_2_press(void)
 	}
 }
 
-static K_SEM_DEFINE(semaphore, 0, 1);
-static const char *out_str;
-
-void display(const char *str)
-{
-	out_str = str;
-	k_sem_give(&semaphore);
-}
-
 void main(void)
 {
 	int err;
-
-	printk("Initializing...\n");
-
-	board_init(&addr);
+	static char addr_message[30] = {0};
 
 	printk("Unicast address: 0x%04x\n", addr);
+
+	printk("Initializing...\n");
+		
+	gpio_init();
+	display_init();
 
 	/* Initialize the Bluetooth Subsystem */
 	err = bt_enable(bt_ready);
@@ -300,9 +312,14 @@ void main(void)
 		printk("Bluetooth init failed (err %d)\n", err);
 	}
 
+	//sprintf(addr_message, "Address: 0x%04x", addr);
+	//display_set_top_label(addr_message);
+	//display_set_center_label("Initialized");
+
 	while (1) {
 		k_sem_take(&semaphore, K_FOREVER);
-		printk("%s", out_str);
+		display_set_center_label(center_message);
+		printk("%s", center_message);
 	}
 
 }

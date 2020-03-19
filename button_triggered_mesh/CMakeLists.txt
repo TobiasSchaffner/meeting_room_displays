@@ -8,6 +8,9 @@ project(mesh_demo)
 
 target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE src/gpio.c)
+if(CONFIG_DISPLAY)
+  target_sources(app PRIVATE src/display.c)
+endif()
 
 if(NODE_ADDR)
   zephyr_compile_definitions(NODE_ADDR=${NODE_ADDR})

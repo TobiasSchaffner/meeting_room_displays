@@ -15,7 +15,6 @@
 #include "gpio.h"
 
 static struct device *gpio;
-static struct device *nvm;
 
 static struct k_work button_1_work;
 static struct k_work button_2_work;
@@ -68,18 +67,7 @@ static void configure_buttons(void)
 	gpio_add_callback(gpio, &button_cb);
 }
 
-void board_init(u16_t *addr)
+void gpio_init()
 {
-	nvm = device_get_binding(DT_FLASH_DEV_NAME);
-
-	*addr = NRF_UICR->CUSTOMER[0];
-	if (!*addr || *addr == 0xffff) {
-#if defined(NODE_ADDR)
-		*addr = NODE_ADDR;
-#else
-		*addr = 0x0b0c;
-#endif
-	}
-
 	configure_buttons();
 }
