@@ -7,7 +7,7 @@ include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 project(mesh_demo)
 
 target_sources(app PRIVATE src/main.c)
-target_sources(app PRIVATE src/board.c)
+target_sources(app PRIVATE src/gpio.c)
 
 if(NODE_ADDR)
   zephyr_compile_definitions(NODE_ADDR=${NODE_ADDR})

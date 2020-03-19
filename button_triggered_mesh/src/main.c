@@ -13,7 +13,7 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/mesh.h>
 
-#include "board.h"
+#include "gpio.h"
 
 #define MOD_LF 0x0000
 

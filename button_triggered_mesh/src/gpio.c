@@ -12,7 +12,7 @@
 #include <ctype.h>
 #include <bluetooth/mesh.h>
 
-#include "board.h"
+#include "gpio.h"
 
 static struct device *gpio;
 static struct device *nvm;
@@ -35,7 +35,7 @@ static void button_pressed(struct device *dev, struct gpio_callback *cb,
 {
 	if (pins & BIT(DT_ALIAS_SW0_GPIOS_PIN)) {
 		k_work_submit(&button_1_work);
-	} 
+	}
 	else if (pins & BIT(DT_ALIAS_SW1_GPIOS_PIN)) {
 		k_work_submit(&button_2_work);
 	}
