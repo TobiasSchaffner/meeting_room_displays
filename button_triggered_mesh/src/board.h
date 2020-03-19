@@ -10,12 +10,7 @@
 #define NODE_ADDR 0x0b0c
 #endif
 
-void board_button_1_pressed(void);
-u16_t board_set_target(void);
-void board_play(const char *str);
+void on_button_1_press(void);
+void on_button_2_press(void);
 
 void board_init(u16_t *addr);
-void board_play_tune(const char *str);
-void board_heartbeat(u8_t hops, u16_t feat);
-void board_other_dev_pressed(u16_t addr);
-void board_attention(bool attention);

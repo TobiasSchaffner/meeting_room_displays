@@ -42,8 +42,7 @@ static u16_t addr = NODE_ADDR;
 
 static void heartbeat(u8_t hops, u16_t feat)
 {
-	board_heartbeat(hops, feat);
-	board_play("100H");
+	printk("Heartbeat arrived with %u hops.\n", hops);
 }
 
 static struct bt_mesh_cfg_srv cfg_srv = {
@@ -69,15 +68,12 @@ static struct bt_mesh_cfg_cli cfg_cli = {
 
 static void attention_on(struct bt_mesh_model *model)
 {
-	printk("attention_on()\n");
-	board_attention(true);
-	board_play("100H100C100H100C100H100C");
+	printk("Attention on.\n");
 }
 
 static void attention_off(struct bt_mesh_model *model)
 {
-	printk("attention_off()\n");
-	board_attention(false);
+	printk("Attention off.\n");
 }
 
 static const struct bt_mesh_health_srv_cb health_srv_cb = {
@@ -97,22 +93,24 @@ static struct bt_mesh_model root_models[] = {
 	BT_MESH_MODEL_HEALTH_SRV(&health_srv, &health_pub),
 };
 
-static void vnd_button_pressed(struct bt_mesh_model *model,
-			       struct bt_mesh_msg_ctx *ctx,
-			       struct net_buf_simple *buf)
+static void message_received(struct bt_mesh_model *model,
+			       			 struct bt_mesh_msg_ctx *ctx,
+			       			 struct net_buf_simple *buf)
 {
-	printk("src 0x%04x\n", ctx->addr);
-
+	printk(" Received message from 0x%04x.\n", ctx->addr);
+	// Check if we received our own message
 	if (ctx->addr == bt_mesh_model_elem(model)->addr) {
+		printk("Ignored message as 0x%04x is our own address.\n", bt_mesh_model_elem(model)->addr);
 		return;
 	}
-
-	board_other_dev_pressed(ctx->addr);
-	board_play("100G200 100G");
+	printk("Message is ");
+	for (int i=0; i < buf->len; i++)
+		printk("%x", buf->data[i]);
+	printk("\n");
 }
 
 static const struct bt_mesh_model_op vnd_ops[] = {
-	{ OP_VENDOR_BUTTON, 0, vnd_button_pressed },
+	{ OP_VENDOR_BUTTON, 0, message_received },
 	BT_MESH_MODEL_OP_END,
 };
 
@@ -164,9 +162,7 @@ static void configure(void)
 		printk("Publishing heartbeat messages\n");
 	}
 #endif
-	printk("Configuration complete\n");
-
-	board_play("100C100D100E100F100G100A100H");
+	printk("Configuration complete.\n");
 }
 
 static const u8_t dev_uuid[16] = { 0xdd, 0xdd };
@@ -178,19 +174,19 @@ static const struct bt_mesh_prov prov = {
 static void bt_ready(int err)
 {
 	if (err) {
-		printk("Bluetooth init failed (err %d)\n", err);
+		printk("Bluetooth init failed. (err %d)\n", err);
 		return;
 	}
 
-	printk("Bluetooth initialized\n");
+	printk("Bluetooth initialized.\n");
 
 	err = bt_mesh_init(&prov, &comp);
 	if (err) {
-		printk("Initializing mesh failed (err %d)\n", err);
+		printk("Initializing mesh failed. (err %d)\n", err);
 		return;
 	}
 
-	printk("Mesh initialized\n");
+	printk("Mesh initialized.\n");
 
 	if (IS_ENABLED(CONFIG_BT_SETTINGS)) {
 		printk("Loading stored settings\n");
@@ -201,12 +197,12 @@ static void bt_ready(int err)
 				dev_key);
 
 	if (err == -EALREADY) {
-		printk("Using stored settings\n");
+		printk("Using stored settings.\n");
 	} else if (err) {
-		printk("Provisioning failed (err %d)\n", err);
+		printk("Provisioning failed. (err %d)\n", err);
 		return;
 	} else {
-		printk("Provisioning completed\n");
+		printk("Provisioning completed.\n");
 		configure();
 	}
 
@@ -224,14 +220,14 @@ static void bt_ready(int err)
 		};
 
 		bt_mesh_cfg_hb_sub_set(net_idx, addr, &sub, NULL);
-		printk("Subscribing to heartbeat messages\n");
+		printk("Subscribing to heartbeat messages.\n");
 	}
 #endif
 }
 
 static u16_t target = GROUP_ADDR;
 
-void board_button_1_pressed(void)
+void on_button_1_press(void)
 {
 	NET_BUF_SIMPLE_DEFINE(msg, 3 + 4);
 	struct bt_mesh_msg_ctx ctx = {
@@ -245,13 +241,13 @@ void board_button_1_pressed(void)
 	bt_mesh_model_msg_init(&msg, OP_VENDOR_BUTTON);
 
 	if (bt_mesh_model_send(&vnd_models[0], &ctx, &msg, NULL, NULL)) {
-		printk("Unable to send Vendor Button message\n");
+		printk("Unable to send Vendor Button message.\n");
 	}
 
-	printk("Button message sent with OpCode 0x%08x\n", OP_VENDOR_BUTTON);
+	printk("Button message sent with OpCode: 0x%08x\n", OP_VENDOR_BUTTON);
 }
 
-u16_t board_set_target(void)
+static u16_t set_target(void)
 {
 	switch (target) {
 	case GROUP_ADDR:
@@ -268,13 +264,24 @@ u16_t board_set_target(void)
 	return target;
 }
 
-static K_SEM_DEFINE(tune_sem, 0, 1);
-static const char *tune_str;
-
-void board_play(const char *str)
+void on_button_2_press(void)
 {
-	tune_str = str;
-	k_sem_give(&tune_sem);
+	u16_t target = set_target();
+
+	if (target > 0x0009) {
+		printk("A");
+	} else {
+		printk("%x", (target & 0xf));
+	}
+}
+
+static K_SEM_DEFINE(semaphore, 0, 1);
+static const char *out_str;
+
+void display(const char *str)
+{
+	out_str = str;
+	k_sem_give(&semaphore);
 }
 
 void main(void)
@@ -294,8 +301,8 @@ void main(void)
 	}
 
 	while (1) {
-		k_sem_take(&tune_sem, K_FOREVER);
-		board_play_tune(tune_str);
+		k_sem_take(&semaphore, K_FOREVER);
+		printk("%s", out_str);
 	}
 
 }

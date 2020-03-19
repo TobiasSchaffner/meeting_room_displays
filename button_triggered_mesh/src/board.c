@@ -10,77 +10,46 @@
 #include <soc.h>
 #include <sys/printk.h>
 #include <ctype.h>
-#include <drivers/gpio.h>
-#include <drivers/pwm.h>
-
 #include <bluetooth/mesh.h>
 
 #include "board.h"
 
-#define SCROLL_SPEED   K_MSEC(300)
-
-#define BUZZER_PIN     EXT_P0_GPIO_PIN
-#define BEEP_DURATION  K_MSEC(60)
-
-#define SEQ_PER_BIT  976
-#define SEQ_PAGE     (NRF_FICR->CODEPAGESIZE * (NRF_FICR->CODESIZE - 1))
-#define SEQ_MAX      (NRF_FICR->CODEPAGESIZE * 8 * SEQ_PER_BIT)
-
 static struct device *gpio;
 static struct device *nvm;
-static struct device *pwm;
 
-static struct k_work button_work;
+static struct k_work button_1_work;
+static struct k_work button_2_work;
 
-static void button_send_pressed(struct k_work *work)
+static void button_1_pressed(struct k_work *work)
 {
-	printk("button_send_pressed()\n");
-	board_button_1_pressed();
+	on_button_1_press();
+}
+
+static void button_2_pressed(struct k_work *work)
+{
+	on_button_2_press();
 }
 
 static void button_pressed(struct device *dev, struct gpio_callback *cb,
 			   u32_t pins)
 {
 	if (pins & BIT(DT_ALIAS_SW0_GPIOS_PIN)) {
-		k_work_submit(&button_work);
-	} else {
-		u16_t target = board_set_target();
-
-		if (target > 0x0009) {
-			printk("A");
-		} else {
-			printk("%x", (target & 0xf));
-		}
+		k_work_submit(&button_1_work);
+	} 
+	else if (pins & BIT(DT_ALIAS_SW1_GPIOS_PIN)) {
+		k_work_submit(&button_2_work);
+	}
+	else {
+		printk("Unexpected button press.\n");
 	}
 }
 
-void board_play_tune(const char *str)
-{
-	printk("play tune: %s\n", str);
-}
-
-void board_heartbeat(u8_t hops, u16_t feat)
-{
-	printk("%u hops\n", hops);
-}
-
-void board_other_dev_pressed(u16_t addr)
-{
-	printk("board_other_dev_pressed(0x%04x)\n", addr);
-}
-
-void board_attention(bool attention)
-{
-	if (attention) {
-		printk("Attention!\n");
-	}
-}
-
-static void configure_button(void)
+static void configure_buttons(void)
 {
 	static struct gpio_callback button_cb;
 
-	k_work_init(&button_work, button_send_pressed);
+	k_work_init(&button_1_work, button_1_pressed);
+	k_work_init(&button_2_work, button_2_pressed);
 
 	gpio = device_get_binding(DT_ALIAS_SW0_GPIOS_CONTROLLER);
 
@@ -102,7 +71,6 @@ static void configure_button(void)
 void board_init(u16_t *addr)
 {
 	nvm = device_get_binding(DT_FLASH_DEV_NAME);
-	pwm = device_get_binding(DT_INST_0_NORDIC_NRF_PWM_LABEL);
 
 	*addr = NRF_UICR->CUSTOMER[0];
 	if (!*addr || *addr == 0xffff) {
@@ -113,5 +81,5 @@ void board_init(u16_t *addr)
 #endif
 	}
 
-	configure_button();
+	configure_buttons();
 }
