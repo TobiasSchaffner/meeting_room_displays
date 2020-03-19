@@ -16,18 +16,12 @@
 
 struct device *display_dev;
 
-lv_obj_t *center_button;
-
 lv_obj_t *top_label;
 lv_obj_t *center_label;
 lv_obj_t *bottom_label;
 
 static void configure_center_label(void){
-    center_button = lv_btn_create(lv_scr_act(), NULL);
-    lv_obj_align(center_button, NULL, LV_ALIGN_CENTER, 0, 0);
-    lv_btn_set_fit(center_button, LV_FIT_TIGHT);
-
-    center_label = lv_label_create(center_button, NULL);
+    center_label = lv_label_create(lv_scr_act(), NULL);
 	lv_obj_align(center_label, NULL, LV_ALIGN_CENTER, 0, 0);
 }
 

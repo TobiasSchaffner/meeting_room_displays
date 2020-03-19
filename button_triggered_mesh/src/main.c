@@ -47,6 +47,7 @@ static const u32_t iv_index;
 static u8_t flags;
 static u16_t addr = NODE_ADDR;
 
+static char addr_message[30] = {0};
 static char center_message[40] = {0};
 static char hop_message[20] = {0};
 static K_SEM_DEFINE(semaphore, 0, 1);
@@ -297,7 +298,6 @@ void on_button_2_press(void)
 void main(void)
 {
 	int err;
-	static char addr_message[30] = {0};
 
 	printk("Unicast address: 0x%04x\n", addr);
 
@@ -312,9 +312,9 @@ void main(void)
 		printk("Bluetooth init failed (err %d)\n", err);
 	}
 
-	//sprintf(addr_message, "Address: 0x%04x", addr);
-	//display_set_top_label(addr_message);
-	//display_set_center_label("Initialized");
+	sprintf(addr_message, "Address: 0x%04x", addr);
+	display_set_top_label(addr_message);
+	display_set_center_label("Initialized");
 
 	while (1) {
 		k_sem_take(&semaphore, K_FOREVER);
