@@ -47,7 +47,7 @@ static const u32_t iv_index;
 static u8_t flags;
 static u16_t addr = NODE_ADDR;
 
-static char addr_message[30] = {0};
+static char addr_message[40] = {0};
 static char center_message[40] = {0};
 static char hop_message[20] = {0};
 static K_SEM_DEFINE(semaphore, 0, 1);
@@ -120,13 +120,11 @@ static void message_received(struct bt_mesh_model *model,
 		return;
 	}
 
-	/* Does not work yet
 	printk("Message is ");
 	for (int i=0; i < buf->len; i++)
 		printk("%x", buf->data[i]);
 	printk("\n");
 	display(buf->data);
-	*/
 }
 
 static const struct bt_mesh_model_op vnd_ops[] = {
@@ -314,7 +312,7 @@ void main(void)
 
 	sprintf(addr_message, "Address: 0x%04x", addr);
 	display_set_top_label(addr_message);
-	display_set_center_label("Initialized");
+	display_set_center_label("Status: Initialized");
 
 	while (1) {
 		k_sem_take(&semaphore, K_FOREVER);
