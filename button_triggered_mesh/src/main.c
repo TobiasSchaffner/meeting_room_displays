@@ -311,8 +311,8 @@ void main(void)
 	}
 
 	sprintf(addr_message, "Address: 0x%04x", addr);
-	display_set_top_label(addr_message);
-	display_set_center_label("Status: Initialized");
+	display_set_center_label(addr_message);
+	display_set_top_label("Status: Initialized");
 
 	while (1) {
 		k_sem_take(&semaphore, K_FOREVER);
