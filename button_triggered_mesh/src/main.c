@@ -26,7 +26,8 @@
 #define GROUP_ADDR 0xc000
 #define PUBLISHER_ADDR  0x000f
 
-#define OP_VENDOR_BUTTON BT_MESH_MODEL_OP_3(0x00, BT_COMP_ID_LF)
+#define OP_VENDOR_BUTTON 	BT_MESH_MODEL_OP_3(0x00, BT_COMP_ID_LF)
+#define OP_VENDOR_HELLO     BT_MESH_MODEL_OP_3(0x01, BT_COMP_ID_LF)
 
 static const u8_t net_key[16] = {
 	0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
@@ -129,6 +130,7 @@ static void message_received(struct bt_mesh_model *model,
 
 static const struct bt_mesh_model_op vnd_ops[] = {
 	{ OP_VENDOR_BUTTON, 0, message_received },
+	{ OP_VENDOR_HELLO, 0, message_received },
 	BT_MESH_MODEL_OP_END,
 };
 
@@ -292,6 +294,31 @@ void on_button_2_press(void)
 		printk("%x", (target & 0xf));
 	}
 }
+
+#define HELLO_MAX 50
+
+void on_button_3_press(void)
+{
+	NET_BUF_SIMPLE_DEFINE(msg, 3 + HELLO_MAX + 4);
+	struct bt_mesh_msg_ctx ctx = {
+		.net_idx = net_idx,
+		.app_idx = app_idx,
+		.addr = target,
+		.send_ttl = BT_MESH_TTL_DEFAULT,
+	};
+	const char *name = "1234567890123456789012345678901234567890\n";
+
+	bt_mesh_model_msg_init(&msg, OP_VENDOR_HELLO);
+	net_buf_simple_add_mem(&msg, name, 42);
+
+	if (bt_mesh_model_send(&vnd_models[0], &ctx, &msg, NULL, NULL) == 0) {
+		printk("Saying \"hi!\" to everyone\n");
+	} else {
+		printk("Sending Failed!\n");
+	}
+}
+
+void on_button_4_press(void) { }
 
 void main(void)
 {
