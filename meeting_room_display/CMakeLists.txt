@@ -8,6 +8,7 @@ project(mesh_demo)
 
 target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE src/gpio.c)
+target_sources(app PRIVATE src/mesh.c)
 if(CONFIG_DISPLAY)
   target_sources(app PRIVATE src/display.c)
 endif()
