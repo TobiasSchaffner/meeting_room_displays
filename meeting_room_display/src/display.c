@@ -60,6 +60,12 @@ static lv_obj_t* calendar_time_slot_labels[10];
 static lv_style_t style_line;
 static lv_point_t line_points[] = {{0, 0}, {305, 0}};
 
+// Appointments
+static lv_style_t style_appointment;
+static int appointments;
+static lv_obj_t* calendar_appointment_slots[10];
+static lv_obj_t* calendar_appointment_labels[10];
+
 static void create_styles(void) {
     lv_style_copy(&style_window, &lv_style_plain);
     style_window.body.border.width = 3;
@@ -73,6 +79,12 @@ static void create_styles(void) {
 
     lv_style_copy(&style_line, &lv_style_plain);
     style_line.line.width = 1;
+
+    lv_style_copy(&style_appointment, &lv_style_plain);
+    style_appointment.body.main_color = LV_COLOR_BLACK;
+    style_appointment.body.grad_color = LV_COLOR_BLACK;
+    style_appointment.body.radius = 10;
+    style_appointment.text.color = LV_COLOR_WHITE;
 }
 
 static void set_styles(void) {
@@ -138,10 +150,10 @@ static void create_calendar(void) {
 
 
     for (int time_slot = 0; time_slot < 10; time_slot++) {
-        calendar_time_slots[time_slot] = lv_obj_create(wallpaper, NULL);
+        calendar_time_slots[time_slot] = lv_obj_create(calendar_window, NULL);
         lv_obj_set_size(calendar_time_slots[time_slot], WINDOW_WIDTH - 4, 41);
         lv_obj_set_style(calendar_time_slots[time_slot], &style_time_slot);
-        lv_obj_align(calendar_time_slots[time_slot], NULL, LV_ALIGN_IN_TOP_LEFT, PADDING + 2, PADDING + 37 + (40 * time_slot));
+        lv_obj_align(calendar_time_slots[time_slot], NULL, LV_ALIGN_IN_TOP_LEFT, 2, 2 + 35 + (40 * time_slot));
 
         calendar_time_slot_labels[time_slot] = lv_label_create(calendar_time_slots[time_slot], NULL);
 	    lv_obj_align(calendar_time_slot_labels[time_slot], NULL, LV_ALIGN_IN_TOP_LEFT, 5, 7);
@@ -157,11 +169,48 @@ static void create_calendar(void) {
     }
 }
 
+void display_create_appointment(const char* name, float start, float end) {
+    if (start >= end || start < 8 || end > 17) return;
+    
+    int slot = appointments+1;
+
+    int halign = 60;
+    int valign = 4 + 35 + (40 * (start - 8));
+    int width = WINDOW_WIDTH - halign - 4;
+    int height = 40 * (end - start) - 3;
+
+
+    calendar_appointment_slots[slot] = lv_obj_create(calendar_window, NULL);
+    lv_obj_set_style(calendar_appointment_slots[slot], &style_appointment);
+    lv_obj_set_size(calendar_appointment_slots[slot], width, height);
+    lv_obj_align(calendar_appointment_slots[slot], NULL, LV_ALIGN_IN_TOP_LEFT, halign, valign);
+
+	calendar_appointment_labels[slot] = lv_label_create(calendar_appointment_slots[slot], NULL);
+    lv_label_set_text(calendar_appointment_labels[slot], name);
+    lv_obj_align(calendar_appointment_labels[slot], NULL, LV_ALIGN_CENTER, 0, 0);
+
+    appointments++;
+}
+
+void display_clear_appointments(void) {
+    for (int slot = 0; slot < appointments; slot++) {
+        lv_obj_del(calendar_appointment_labels[slot]);
+        lv_obj_del(calendar_appointment_slots[slot]);
+    }
+    appointments = 0;
+    lv_task_handler();
+}
+
 static void create_windows(void) {
     create_wallpaper();
     create_calendar();
     create_main_window();
     create_status_window();
+
+	display_create_appointment("Wolram: Trumpf", 8.0, 9.5);
+	display_create_appointment("Tobias: Espe", 10.5, 11.0);
+	display_create_appointment("Benedikt: Linux", 13.5, 15.0);
+
     lv_task_handler();
 }
 
@@ -185,19 +234,19 @@ int display_init(void)
 }
 
 void display_set_status_message(const char* message) {
-    sprintf(status_message_message, "Status: %s", message);
+    snprintf(status_message_message, 20, "Status: %s", message);
     lv_label_set_text(status_message_label, status_message_message);
     lv_task_handler();
 }
 
 void display_set_status_address(u16_t address) {
-    sprintf(status_address_message, "Address: 0x%04x", address);
+    snprintf(status_address_message, 20, "Address: 0x%04x", address);
     lv_label_set_text(status_address_label, status_address_message);
     lv_task_handler();
 }
 
 void display_set_status_heartbeat(u16_t hops) {
-    sprintf(status_heartbeat_message, "Hops: %d", hops);
+    snprintf(status_heartbeat_message, 20, "Hops: %d", hops);
     lv_label_set_text(status_heartbeat_label, status_heartbeat_message);
     lv_task_handler();
 }

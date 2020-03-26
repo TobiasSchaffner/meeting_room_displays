@@ -7,7 +7,7 @@ flash-all: flash-display flash-node flash-sender
 display: build-display flash-display
 
 build-display:
-	west build -d display-build -p auto . -- -DOVERLAY_CONFIG=display.conf -DNODE_ADDR=0x030c
+	west build -d display-build -p auto . -- -DOVERLAY_CONFIG="display.conf debug.conf" -DNODE_ADDR=0x030c
 
 flash-display:
 	@echo ">>>>>>>>DISPLAY<<<<<<<<"
