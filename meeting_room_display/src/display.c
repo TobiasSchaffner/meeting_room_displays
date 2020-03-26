@@ -15,8 +15,6 @@
 #include "display.h"
 #include "images.h"
 
-
-
 #define SCREEN_WIDTH    800
 #define SCREEN_HEIGTH   480
 #define PADDING         20

@@ -103,7 +103,7 @@ static void message_received(struct bt_mesh_model *model,
     on_message_received(buf->data, buf->len);
 }
 
-u16_t set_target(void)
+u16_t mesh_set_target_address(void)
 {
 	switch (target) {
 	case GROUP_ADDR:
@@ -140,7 +140,7 @@ static const struct bt_mesh_comp comp = {
 	.elem_count = ARRAY_SIZE(elements),
 };
 
-void send_button_message(void) {
+void mesh_send_button_message(void) {
     NET_BUF_SIMPLE_DEFINE(msg, 3 + 4);
 	struct bt_mesh_msg_ctx ctx = {
 		.net_idx = net_idx,
@@ -161,7 +161,7 @@ void send_button_message(void) {
 
 #define HELLO_MAX 50
 
-void send_message(const char* message, u16_t len) {
+void mesh_send_message(const char* message, u16_t len) {
 	NET_BUF_SIMPLE_DEFINE(msg, 3 + HELLO_MAX + 4);
 	struct bt_mesh_msg_ctx ctx = {
 		.net_idx = net_idx,

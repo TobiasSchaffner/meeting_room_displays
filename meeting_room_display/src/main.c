@@ -28,12 +28,12 @@ static void display(char *str)
 
 void on_button_1_press(void)
 {
-	send_button_message();
+	mesh_send_button_message();
 }
 
 void on_button_2_press(void)
 {
-	u16_t target = set_target();
+	u16_t target = mesh_set_target_address();
 
 	if (target > 0x0009) {
 		printk("A");
@@ -45,7 +45,7 @@ void on_button_2_press(void)
 void on_button_3_press(void)
 {
 	const char *name = "1234567890123456789012345678901234567890\n";
-	send_message(name, 42);
+	mesh_send_message(name, 42);
 }
 
 void on_button_4_press(void) { }
