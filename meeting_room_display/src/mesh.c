@@ -277,14 +277,14 @@ static void bt_ready(int err)
 #endif
 }
 
-void mesh_init(void) {
+int mesh_init(void) {
     int err;
-
-	printk("Unicast address: 0x%04x\n", addr);
 
     /* Initialize the Bluetooth Subsystem */
 	err = bt_enable(bt_ready);
 	if (err) {
 		printk("Bluetooth init failed (err %d)\n", err);
 	}
+
+	return err;
 }

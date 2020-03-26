@@ -3,16 +3,16 @@
  */
 
 #if defined(CONFIG_DISPLAY)
-void display_init(void);
+int display_init(void);
 
-void display_set_status_message_label(char* message);
-void display_set_status_address_label(char* message);
-void display_set_status_heartbeat_label(char* message);
+void display_set_status_message(const char* message);
+void display_set_status_address(u16_t address);
+void display_set_status_heartbeat(u16_t hops);
 #else
-void display_init(void) {}
+int display_init(void) { return 0; }
 
-void display_set_status_message_label(char* message) {}
-void display_set_status_address_label(char* message) {}
-void display_set_status_heartbeat_label(char* message) {}
+void display_set_status_message(const char* message) {}
+void display_set_status_address(u16_t address) {}
+void display_set_status_heartbeat(u16_t hops) {}
 #endif // 
 

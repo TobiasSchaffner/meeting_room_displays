@@ -41,6 +41,10 @@ static lv_obj_t* status_address_label;
 static lv_obj_t* status_message_label;
 static lv_obj_t* status_heartbeat_label;
 
+static char status_address_message[20] = {0};
+static char status_message_message[20] = {0};
+static char status_heartbeat_message[20] = {0};
+
 // Calendar Windows
 static lv_obj_t* calendar_window;
 
@@ -161,13 +165,13 @@ static void create_windows(void) {
     lv_task_handler();
 }
 
-void display_init(void)
+int display_init(void)
 {
 	display_dev = device_get_binding(CONFIG_LVGL_DISPLAY_DEV_NAME);
 
 	if (display_dev == NULL) {
 		printk("Device not found.");
-		return;
+		return 1;
 	}
 
     create_styles();
@@ -176,19 +180,24 @@ void display_init(void)
     display_blanking_off(display_dev);
 
     set_styles();
+
+    return 0;
 }
 
-void display_set_status_message_label(char* message) {
-    lv_label_set_text(status_message_label, message);
+void display_set_status_message(const char* message) {
+    sprintf(status_message_message, "Status: %s", message);
+    lv_label_set_text(status_message_label, status_message_message);
     lv_task_handler();
 }
 
-void display_set_status_address_label(char* message) {
-    lv_label_set_text(status_address_label, message);
+void display_set_status_address(u16_t address) {
+    sprintf(status_address_message, "Address: 0x%04x", address);
+    lv_label_set_text(status_address_label, status_address_message);
     lv_task_handler();
 }
 
-void display_set_status_heartbeat_label(char* message) {
-    lv_label_set_text(status_heartbeat_label, message);
+void display_set_status_heartbeat(u16_t hops) {
+    sprintf(status_heartbeat_message, "Hops: %d", hops);
+    lv_label_set_text(status_heartbeat_label, status_heartbeat_message);
     lv_task_handler();
 }

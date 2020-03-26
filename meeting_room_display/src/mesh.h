@@ -4,7 +4,7 @@
 extern u16_t addr;
 extern u16_t target;
 
-void mesh_init(void);
+int mesh_init(void);
 
 u16_t mesh_set_target_address(void);
 void mesh_send_button_message(void);

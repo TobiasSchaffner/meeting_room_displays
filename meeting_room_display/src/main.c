@@ -14,17 +14,7 @@
 #include "gpio.h"
 #include "display.h"
 
-static char addr_message[40] = {0};
-static char center_message[40] = {0};
-static char hop_message[20] = {0};
-
 static K_SEM_DEFINE(semaphore, 0, 1);
-
-static void display(char *str)
-{
-	sprintf(center_message, "%s", str);
-	k_sem_give(&semaphore);
-}
 
 void on_button_1_press(void)
 {
@@ -51,34 +41,43 @@ void on_button_3_press(void)
 void on_button_4_press(void) { }
 
 void on_message_received(char* message, u16_t len) {
-	printk("Message is ");
-	for (int i=0; i < len; i++)
-		printk("%x", message[i]);
-	printk("\n");
-	display(message);
+	printk("Status: %s\n", message);
+	display_set_status_message(message);
 }
 
 void on_heartbeat(u16_t hops) {
-	printk("Heartbeat arrived with %u hops.\n", hops);
-	sprintf(hop_message, "Hops: %d", hops);
-	display_set_status_heartbeat_label(hop_message);
+	printk("Hops: %d\n", hops);
+	display_set_status_heartbeat(hops);
 }
 
 void main(void)
 {
-	printk("Initializing...\n");
-		
-	gpio_init();
-	display_init();
-	mesh_init();
+	int err = 0;
+	printk("Status: Initializing\n");
+	
+	err = display_init();	
 
-	sprintf(addr_message, "Address: 0x%04x", addr);
-	display_set_status_address_label(addr_message);
-	display_set_status_message_label("Status: Initialized");
+	if (!err) {
+		err = gpio_init();
+
+		if (!err)
+			err = mesh_init();
+
+		if (err) {
+			printk("Status: Error\n");
+			display_set_status_message("Error");
+		}
+	}
+
+	if (!err) {
+		printk("Address: 0x%04x\n", addr);
+		display_set_status_address(addr);
+
+		printk("Status: Initialized\n");
+		display_set_status_message("Initialized");
+	}
 
 	while (1) {
 		k_sem_take(&semaphore, K_FOREVER);
-		display_set_status_message_label(center_message);
-		printk("%s", center_message);
 	}
 }

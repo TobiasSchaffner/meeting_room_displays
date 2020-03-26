@@ -98,7 +98,9 @@ static void configure_buttons(void)
 	gpio_add_callback(gpio, &button_cb);
 }
 
-void gpio_init()
+int gpio_init()
 {
 	configure_buttons();
+
+	return 0;
 }
