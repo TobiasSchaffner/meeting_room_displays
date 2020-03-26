@@ -61,7 +61,7 @@ void on_message_received(char* message, u16_t len) {
 void on_heartbeat(u16_t hops) {
 	printk("Heartbeat arrived with %u hops.\n", hops);
 	sprintf(hop_message, "Hops: %d", hops);
-	display_set_bottom_label(hop_message);
+	display_set_status_heartbeat_label(hop_message);
 }
 
 void main(void)
@@ -73,12 +73,12 @@ void main(void)
 	mesh_init();
 
 	sprintf(addr_message, "Address: 0x%04x", addr);
-	display_set_center_label(addr_message);
-	display_set_top_label("Status: Initialized");
+	display_set_status_address_label(addr_message);
+	display_set_status_message_label("Status: Initialized");
 
 	while (1) {
 		k_sem_take(&semaphore, K_FOREVER);
-		display_set_center_label(center_message);
+		display_set_status_message_label(center_message);
 		printk("%s", center_message);
 	}
 }

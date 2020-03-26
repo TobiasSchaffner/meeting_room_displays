@@ -39,7 +39,7 @@ static lv_obj_t* status_window;
 
 static lv_obj_t* status_address_label;
 static lv_obj_t* status_message_label;
-static lv_obj_t* status_hearthbeat_label;
+static lv_obj_t* status_heartbeat_label;
 
 // Calendar Windows
 static lv_obj_t* calendar_window;
@@ -111,9 +111,9 @@ static void create_status_window(void) {
     lv_label_set_text(status_address_label, "Address:");
 	lv_obj_align(status_address_label, NULL, LV_ALIGN_IN_LEFT_MID, 10, 0);
 
-    status_hearthbeat_label = lv_label_create(status_window, NULL);
-    lv_label_set_text(status_hearthbeat_label, "Hops:");
-	lv_obj_align(status_hearthbeat_label, NULL, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10);
+    status_heartbeat_label = lv_label_create(status_window, NULL);
+    lv_label_set_text(status_heartbeat_label, "Hops:");
+	lv_obj_align(status_heartbeat_label, NULL, LV_ALIGN_IN_BOTTOM_LEFT, 10, -10);
 }
 
 static void create_calendar(void) {
@@ -178,17 +178,17 @@ void display_init(void)
     set_styles();
 }
 
-void display_set_top_label(char* message) {
+void display_set_status_message_label(char* message) {
     lv_label_set_text(status_message_label, message);
     lv_task_handler();
 }
 
-void display_set_center_label(char* message) {
+void display_set_status_address_label(char* message) {
     lv_label_set_text(status_address_label, message);
     lv_task_handler();
 }
 
-void display_set_bottom_label(char* message) {
-    lv_label_set_text(status_hearthbeat_label, message);
+void display_set_status_heartbeat_label(char* message) {
+    lv_label_set_text(status_heartbeat_label, message);
     lv_task_handler();
 }
