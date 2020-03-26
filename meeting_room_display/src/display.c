@@ -171,14 +171,14 @@ static void create_calendar(void) {
 
 void display_create_appointment(const char* name, float start, float end) {
     if (start >= end || start < 8 || end > 17) return;
-    
-    int slot = appointments+1;
+    printk("Adding Apointment %s\n", name);
+
+    int slot = appointments;
 
     int halign = 60;
     int valign = 4 + 35 + (40 * (start - 8));
     int width = WINDOW_WIDTH - halign - 4;
     int height = 40 * (end - start) - 3;
-
 
     calendar_appointment_slots[slot] = lv_obj_create(calendar_window, NULL);
     lv_obj_set_style(calendar_appointment_slots[slot], &style_appointment);
@@ -190,6 +190,7 @@ void display_create_appointment(const char* name, float start, float end) {
     lv_obj_align(calendar_appointment_labels[slot], NULL, LV_ALIGN_CENTER, 0, 0);
 
     appointments++;
+    lv_task_handler();
 }
 
 void display_clear_appointments(void) {
@@ -206,11 +207,6 @@ static void create_windows(void) {
     create_calendar();
     create_main_window();
     create_status_window();
-
-	display_create_appointment("Wolram: Trumpf", 8.0, 9.5);
-	display_create_appointment("Tobias: Espe", 10.5, 11.0);
-	display_create_appointment("Benedikt: Linux", 13.5, 15.0);
-
     lv_task_handler();
 }
 

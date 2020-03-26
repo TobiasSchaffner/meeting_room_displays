@@ -159,10 +159,8 @@ void mesh_send_button_message(void) {
 	printk("Button message sent with OpCode: 0x%08x\n", OP_VENDOR_BUTTON);
 }
 
-#define HELLO_MAX 50
-
 void mesh_send_message(const char* message, u16_t len) {
-	NET_BUF_SIMPLE_DEFINE(msg, 3 + HELLO_MAX + 4);
+	NET_BUF_SIMPLE_DEFINE(msg, 3 + len + 4);
 	struct bt_mesh_msg_ctx ctx = {
 		.net_idx = net_idx,
 		.app_idx = app_idx,
