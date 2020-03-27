@@ -3,9 +3,6 @@
 
 #include <settings/settings.h>
 
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/mesh.h>
-
 #include "mesh.h"
 
 #if !defined(NODE_ADDR)
@@ -17,11 +14,8 @@
 #define GROUP_ADDR 0xc000
 #define PUBLISHER_ADDR  0x000f
 
-#define OP_VENDOR_BUTTON 	BT_MESH_MODEL_OP_3(0x00, BT_COMP_ID_LF)
-#define OP_VENDOR_HELLO     BT_MESH_MODEL_OP_3(0x01, BT_COMP_ID_LF)
-
-u16_t addr = NODE_ADDR;
-u16_t target = GROUP_ADDR;
+u16_t mesh_addr = NODE_ADDR;
+u16_t mesh_target = GROUP_ADDR;
 
 static const u8_t net_key[16] = {
 	0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
@@ -103,26 +97,15 @@ static void message_received(struct bt_mesh_model *model,
     on_message_received(buf->data, buf->len);
 }
 
-u16_t mesh_set_target_address(void)
-{
-	switch (target) {
-	case GROUP_ADDR:
-		target = 1U;
-		break;
-	case 9:
-		target = GROUP_ADDR;
-		break;
-	default:
-		target++;
-		break;
-	}
-
-	return target;
-}
-
 static const struct bt_mesh_model_op vnd_ops[] = {
-	{ OP_VENDOR_BUTTON, 0, message_received },
-	{ OP_VENDOR_HELLO, 0, message_received },
+	{ MESH_MESSAGE_DAY, 0, message_received },
+	{ MESH_MESSAGE_ROOM, 0, message_received },
+	{ MESH_MESSAGE_APPOINTMENT, 0, message_received },
+	{ MESH_MESSAGE_APPOINTMENTS_CLEAR, 0, message_received },
+
+	{ MESH_MESSAGE_STRING, 0, message_received },
+	{ MESH_MESSAGE_BUTTON, 0, message_received },
+
 	BT_MESH_MODEL_OP_END,
 };
 
@@ -140,36 +123,36 @@ static const struct bt_mesh_comp comp = {
 	.elem_count = ARRAY_SIZE(elements),
 };
 
-void mesh_send_button_message(void) {
-    NET_BUF_SIMPLE_DEFINE(msg, 3 + 4);
-	struct bt_mesh_msg_ctx ctx = {
-		.net_idx = net_idx,
-		.app_idx = app_idx,
-		.addr = target,
-		.send_ttl = BT_MESH_TTL_DEFAULT,
-	};
-
-	/* Bind to Health model */
-	bt_mesh_model_msg_init(&msg, OP_VENDOR_BUTTON);
-
-	if (bt_mesh_model_send(&vnd_models[0], &ctx, &msg, NULL, NULL)) {
-		printk("Unable to send Vendor Button message.\n");
+u16_t mesh_set_target_address(void)
+{
+	switch (mesh_target) {
+	case GROUP_ADDR:
+		mesh_target = 1U;
+		break;
+	case 9:
+		mesh_target = GROUP_ADDR;
+		break;
+	default:
+		mesh_target++;
+		break;
 	}
 
-	printk("Button message sent with OpCode: 0x%08x\n", OP_VENDOR_BUTTON);
+	return mesh_target;
 }
 
-void mesh_send_message(const char* message, u16_t len) {
+void mesh_send_message(u32_t message_type, const void* message, u16_t len) {
 	NET_BUF_SIMPLE_DEFINE(msg, 3 + len + 4);
 	struct bt_mesh_msg_ctx ctx = {
 		.net_idx = net_idx,
 		.app_idx = app_idx,
-		.addr = target,
+		.addr = mesh_target,
 		.send_ttl = BT_MESH_TTL_DEFAULT,
 	};
 	
-	bt_mesh_model_msg_init(&msg, OP_VENDOR_HELLO);
-	net_buf_simple_add_mem(&msg, message, len);
+	bt_mesh_model_msg_init(&msg, message_type);
+
+	if (len != 0 && message != NULL)
+		net_buf_simple_add_mem(&msg, message, len);
 
 	if (bt_mesh_model_send(&vnd_models[0], &ctx, &msg, NULL, NULL) == 0) {
 		printk("Saying \"hi!\" to everyone\n");
@@ -183,18 +166,18 @@ static void configure(void)
 	printk("Configuring...\n");
 
 	/* Add Application Key */
-	bt_mesh_cfg_app_key_add(net_idx, addr, net_idx, app_idx, app_key, NULL);
+	bt_mesh_cfg_app_key_add(net_idx, mesh_addr, net_idx, app_idx, app_key, NULL);
 
 	/* Bind to vendor model */
-	bt_mesh_cfg_mod_app_bind_vnd(net_idx, addr, addr, app_idx,
+	bt_mesh_cfg_mod_app_bind_vnd(net_idx, mesh_addr, mesh_addr, app_idx,
 				     MOD_LF, BT_COMP_ID_LF, NULL);
 
 	/* Bind to Health model */
-	bt_mesh_cfg_mod_app_bind(net_idx, addr, addr, app_idx,
+	bt_mesh_cfg_mod_app_bind(net_idx, mesh_addr, mesh_addr, app_idx,
 				 BT_MESH_MODEL_ID_HEALTH_SRV, NULL);
 
 	/* Add model subscription */
-	bt_mesh_cfg_mod_sub_add_vnd(net_idx, addr, addr, GROUP_ADDR,
+	bt_mesh_cfg_mod_sub_add_vnd(net_idx, mesh_addr, mesh_addr, GROUP_ADDR,
 				    MOD_LF, BT_COMP_ID_LF, NULL);
 
 #if NODE_ADDR == PUBLISHER_ADDR
@@ -208,7 +191,7 @@ static void configure(void)
 			.net_idx = net_idx,
 		};
 
-		bt_mesh_cfg_hb_pub_set(net_idx, addr, &pub, NULL);
+		bt_mesh_cfg_hb_pub_set(net_idx, mesh_addr, &pub, NULL);
 		printk("Publishing heartbeat messages\n");
 	}
 #endif
@@ -243,7 +226,7 @@ static void bt_ready(int err)
 		settings_load();
 	}
 
-	err = bt_mesh_provision(net_key, net_idx, flags, iv_index, addr,
+	err = bt_mesh_provision(net_key, net_idx, flags, iv_index, mesh_addr,
 				dev_key);
 
 	if (err == -EALREADY) {
@@ -269,7 +252,7 @@ static void bt_ready(int err)
 			.period = 0x10,
 		};
 
-		bt_mesh_cfg_hb_sub_set(net_idx, addr, &sub, NULL);
+		bt_mesh_cfg_hb_sub_set(net_idx, mesh_addr, &sub, NULL);
 		printk("Subscribing to heartbeat messages.\n");
 	}
 #endif

@@ -22,7 +22,7 @@ static char test_string[] = "A502 .5§Freitag 25.06.20§Wolram: Trumpf§9.0§9.5
 
 void on_button_1_press(void)
 {
-	mesh_send_button_message();
+	mesh_send_message(MESH_MESSAGE_BUTTON, NULL, 0);
 }
 
 void on_button_2_press(void)
@@ -38,15 +38,15 @@ void on_button_2_press(void)
 
 void on_button_3_press(void)
 {
-	const char *name = "1234567890123456789012345678901234567890\n";
-	mesh_send_message(name, 42);
+	const char name[] = "Wolfram: Esp";
+	mesh_send_message(MESH_MESSAGE_STRING, name, 13);
 }
 
 void on_button_4_press(void) { }
 
-void on_message_received(char* message, u16_t len)
+void on_message_received(void* message, u16_t len)
 {
-	printk("Status: %s\n", message);
+	printk("Status: %s\n", (char*) message);
 	display_set_status_message(message);
 }
 
@@ -99,8 +99,8 @@ void main(void)
 	}
 
 	if (!err) {
-		printk("Address: 0x%04x\n", addr);
-		display_set_status_address(addr);
+		printk("Address: 0x%04x\n", mesh_addr);
+		display_set_status_address(mesh_addr);
 
 		printk("Status: Initialized\n");
 		display_set_status_message("Initialized");
