@@ -1,3 +1,6 @@
+#ifndef IMAGES_H
+#define IMAGES_H
+
 #ifndef LV_ATTRIBUTE_MEM_ALIGN
 #define LV_ATTRIBUTE_MEM_ALIGN
 #endif
@@ -125,3 +128,5 @@ const lv_img_dsc_t chess = {
   .header.cf = LV_IMG_CF_TRUE_COLOR,
   .data = chess_map,
 };
+
+#endif

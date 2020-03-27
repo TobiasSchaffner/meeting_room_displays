@@ -169,16 +169,20 @@ static void create_calendar(void) {
     }
 }
 
-void display_create_appointment(const char* name, float start, float end) {
-    if (start >= end || start < 8 || end > 17) return;
-    printk("Adding Apointment %s\n", name);
+void display_create_appointment(message_appointment* appointment) {
+    if (appointment->start >= appointment->end ||
+        appointment->start < 8 ||
+        appointment->end > 18)
+            return;
+
+    printk("Adding Apointment %s\n", appointment->description);
 
     int slot = appointments;
 
     int halign = 60;
-    int valign = 4 + 35 + (40 * (start - 8));
+    int valign = 4 + 35 + (40 * (appointment->start - 8));
     int width = WINDOW_WIDTH - halign - 4;
-    int height = 40 * (end - start) - 3;
+    int height = 40 * (appointment->end - appointment->start) - 3;
 
     calendar_appointment_slots[slot] = lv_obj_create(calendar_window, NULL);
     lv_obj_set_style(calendar_appointment_slots[slot], &style_appointment);
@@ -186,7 +190,7 @@ void display_create_appointment(const char* name, float start, float end) {
     lv_obj_align(calendar_appointment_slots[slot], NULL, LV_ALIGN_IN_TOP_LEFT, halign, valign);
 
 	calendar_appointment_labels[slot] = lv_label_create(calendar_appointment_slots[slot], NULL);
-    lv_label_set_text(calendar_appointment_labels[slot], name);
+    lv_label_set_text(calendar_appointment_labels[slot], appointment->description);
     lv_obj_align(calendar_appointment_labels[slot], NULL, LV_ALIGN_CENTER, 0, 0);
 
     appointments++;
