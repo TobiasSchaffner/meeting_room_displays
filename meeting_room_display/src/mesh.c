@@ -83,28 +83,39 @@ static struct bt_mesh_model root_models[] = {
 	BT_MESH_MODEL_HEALTH_SRV(&health_srv, &health_pub),
 };
 
-static void message_received(struct bt_mesh_model *model,
-			       			 struct bt_mesh_msg_ctx *ctx,
-			       			 struct net_buf_simple *buf)
-{
+static void message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf, u32_t opcode) {
 	printk(" Received message from 0x%04x.\n", ctx->addr);
+
 	// Check if we received our own message
 	if (ctx->addr == bt_mesh_model_elem(model)->addr) {
 		printk("Ignored message as 0x%04x is our own address.\n", bt_mesh_model_elem(model)->addr);
 		return;
 	}
 
-    on_message_received(buf->data, buf->len);
+    on_message_received(opcode, buf->data, buf->len);
 }
 
-static const struct bt_mesh_model_op vnd_ops[] = {
-	{ MESH_MESSAGE_DAY, 0, message_received },
-	{ MESH_MESSAGE_ROOM, 0, message_received },
-	{ MESH_MESSAGE_APPOINTMENT, 0, message_received },
-	{ MESH_MESSAGE_APPOINTMENTS_CLEAR, 0, message_received },
+static void day_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
+	message_received(model, ctx, buf, MESH_MESSAGE_DAY);}
+static void room_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
+	message_received(model, ctx, buf, MESH_MESSAGE_ROOM);}
+static void appointment_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
+	message_received(model, ctx, buf, MESH_MESSAGE_APPOINTMENT);}
+static void clear_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
+	message_received(model, ctx, buf, MESH_MESSAGE_APPOINTMENTS_CLEAR);}
+static void string_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
+	message_received(model, ctx, buf, MESH_MESSAGE_STRING);}
+static void button_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
+	message_received(model, ctx, buf, MESH_MESSAGE_BUTTON);}
 
-	{ MESH_MESSAGE_STRING, 0, message_received },
-	{ MESH_MESSAGE_BUTTON, 0, message_received },
+static const struct bt_mesh_model_op vnd_ops[] = {
+	{ MESH_MESSAGE_DAY, 0, day_message_received },
+	{ MESH_MESSAGE_ROOM, 0, room_message_received },
+	{ MESH_MESSAGE_APPOINTMENT, 0, appointment_message_received },
+	{ MESH_MESSAGE_APPOINTMENTS_CLEAR, 0, clear_message_received },
+
+	{ MESH_MESSAGE_STRING, 0, string_message_received },
+	{ MESH_MESSAGE_BUTTON, 0, button_message_received },
 
 	BT_MESH_MODEL_OP_END,
 };
@@ -123,7 +134,7 @@ static const struct bt_mesh_comp comp = {
 	.elem_count = ARRAY_SIZE(elements),
 };
 
-u16_t mesh_set_target_address(void)
+void mesh_increment_target_address(void)
 {
 	switch (mesh_target) {
 	case GROUP_ADDR:
@@ -136,8 +147,6 @@ u16_t mesh_set_target_address(void)
 		mesh_target++;
 		break;
 	}
-
-	return mesh_target;
 }
 
 void mesh_send_message(u32_t message_type, const void* message, u16_t len) {

@@ -22,9 +22,9 @@ typedef struct message_appointment
 
 int mesh_init(void);
 
-u16_t mesh_set_target_address(void);
+void mesh_increment_target_address(void);
 void mesh_send_message(u32_t message_type, const void* message, u16_t len);
 
 // Callbacks to be defined by main
-void on_message_received(void* message, u16_t len);
+void on_message_received(u32_t message_type, const void* message, u16_t len);
 void on_heartbeat(u16_t hops);

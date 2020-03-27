@@ -21,44 +21,28 @@ static struct k_work button_2_work;
 static struct k_work button_3_work;
 static struct k_work button_4_work;
 
-static void button_1_pressed(struct k_work *work)
-{
-	on_button_1_press();
-}
-
-static void button_2_pressed(struct k_work *work)
-{
-	on_button_2_press();
-}
-
-static void button_3_pressed(struct k_work *work)
-{
-	on_button_3_press();
-}
-
-static void button_4_pressed(struct k_work *work)
-{
-	on_button_4_press();
-}
+static void button_1_pressed(struct k_work *work){
+	on_button_press(1);}
+static void button_2_pressed(struct k_work *work){
+	on_button_press(2);}
+static void button_3_pressed(struct k_work *work){
+	on_button_press(3);}
+static void button_4_pressed(struct k_work *work){
+	on_button_press(4);}
 
 static void button_pressed(struct device *dev, struct gpio_callback *cb,
 			   u32_t pins)
 {
 	if (pins & BIT(DT_ALIAS_SW0_GPIOS_PIN)) {
-		k_work_submit(&button_1_work);
-	}
+		k_work_submit(&button_1_work);}
 	else if (pins & BIT(DT_ALIAS_SW1_GPIOS_PIN)) {
-		k_work_submit(&button_2_work);
-	}
+		k_work_submit(&button_2_work);}
 	else if (pins & BIT(DT_ALIAS_SW2_GPIOS_PIN)) {
-		k_work_submit(&button_3_work);
-	}
+		k_work_submit(&button_3_work);}
 	else if (pins & BIT(DT_ALIAS_SW3_GPIOS_PIN)) {
-		k_work_submit(&button_4_work);
-	}
+		k_work_submit(&button_4_work);}
 	else {
-		printk("Unexpected button press.\n");
-	}
+		printk("Unexpected button press.\n");}
 }
 
 static void configure_buttons(void)
@@ -101,6 +85,5 @@ static void configure_buttons(void)
 int gpio_init()
 {
 	configure_buttons();
-
 	return 0;
 }

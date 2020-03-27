@@ -18,33 +18,33 @@
 
 static K_SEM_DEFINE(semaphore, 0, 1);
 
-static char test_string[] = "A502 .5§Freitag 25.06.20§Wolram: Trumpf§9.0§9.5§Tobias: Espe§12.0§13§Benedikt: Linux§16.0§17.0";
-
-void on_button_1_press(void)
+void on_button_press(u32_t button)
 {
-	mesh_send_message(MESH_MESSAGE_BUTTON, NULL, 0);
-}
+	const char test_string[] = "Wolfram: Esp";
 
-void on_button_2_press(void)
-{
-	u16_t target = mesh_set_target_address();
+	switch(button) {
+		case 1:
+			mesh_send_message(MESH_MESSAGE_BUTTON, NULL, 0);
+			break;
+		case 2:
+			mesh_increment_target_address();
 
-	if (target > 0x0009) {
-		printk("A");
-	} else {
-		printk("%x", (target & 0xf));
+			if (mesh_target > 0x0009) {
+				printk("A");
+			} else {
+				printk("%x", (mesh_target & 0xf));
+			}
+			break;
+		case 3:
+			mesh_send_message(MESH_MESSAGE_STRING, test_string, 13);
+			break;
+		case 4:
+		default:
+			break;
 	}
 }
 
-void on_button_3_press(void)
-{
-	const char name[] = "Wolfram: Esp";
-	mesh_send_message(MESH_MESSAGE_STRING, name, 13);
-}
-
-void on_button_4_press(void) { }
-
-void on_message_received(void* message, u16_t len)
+void on_message_received(u32_t message_type, const void* message, u16_t len)
 {
 	printk("Status: %s\n", (char*) message);
 	display_set_status_message(message);
@@ -54,29 +54,6 @@ void on_heartbeat(u16_t hops)
 {
 	printk("Hops: %d\n", hops);
 	display_set_status_heartbeat(hops);
-}
-
-static void parse_message(char* message)
-{
-	const char delimiter[2] = "§";
-
-	printk("Parsing\n");
-	char* room = strtok(message, delimiter);
-	if (room == NULL) return;
-	printk("%s\n", room);
-
-	char* date = strtok(NULL, delimiter);
-	if (date == NULL) return;
-	printk("%s\n", date);
-
-	char* element_name;
-	float start;
-	float end;
-	while ((element_name = strtok(NULL, delimiter)) != NULL) {
-		start = atof(strtok(NULL, delimiter));
-		end = atof(strtok(NULL, delimiter));
-		display_create_appointment(element_name, start, end);
-	}
 }
 
 void main(void)
@@ -105,9 +82,6 @@ void main(void)
 		printk("Status: Initialized\n");
 		display_set_status_message("Initialized");
 	}
-
-	parse_message(test_string);
-	display_clear_appointments();
 
 	while (1) {
 		k_sem_take(&semaphore, K_FOREVER);
