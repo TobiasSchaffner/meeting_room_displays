@@ -13,6 +13,6 @@ if(CONFIG_DISPLAY)
   target_sources(app PRIVATE src/display.c)
 endif()
 
-if(NODE_ADDR)
-  zephyr_compile_definitions(NODE_ADDR=${NODE_ADDR})
+if(MESH_NODE_ADDR)
+  zephyr_compile_definitions(MESH_NODE_ADDR=${MESH_NODE_ADDR})
 endif()

@@ -7,7 +7,7 @@ flash-all: flash-display flash-node flash-sender
 display: build-display flash-display
 
 build-display:
-	west build -d display-build -p auto . -- -DOVERLAY_CONFIG="display.conf debug.conf" -DNODE_ADDR=0x030c
+	west build -d display-build -p auto . -- -DOVERLAY_CONFIG="display.conf debug.conf" -DMESH_NODE_ADDR=0x030c
 
 flash-display:
 	@echo ">>>>>>>>DISPLAY<<<<<<<<"
@@ -16,7 +16,7 @@ flash-display:
 node: build-node flash-node
 
 build-node:
-	west build -d node-build -p auto . -- -DNODE_ADDR=0x030d
+	west build -d node-build -p auto . -- -DMESH_NODE_ADDR=0x030d
 
 flash-node:
 	@echo ">>>>>>>>NODE<<<<<<<<"
@@ -26,7 +26,7 @@ sender: build-sender flash-sender
 
 build-sender:
 	@echo ">>>>>>>>SENDER<<<<<<<<"
-	west build -d sender-build -p auto . -- -DNODE_ADDR=0x000f
+	west build -d sender-build -p auto . -- -DMESH_NODE_ADDR=0x000f
 
 flash-sender:
 	west flash -d sender-build

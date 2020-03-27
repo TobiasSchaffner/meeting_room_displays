@@ -24,30 +24,34 @@ void on_button_press(u32_t button)
 
 	switch(button) {
 		case 1:
-			mesh_send_message(MESH_MESSAGE_BUTTON, NULL, 0);
+			mesh_send_message(MESH_MESSAGE_BUTTON, MESH_GROUP_ADDR, NULL, 0);
 			break;
 		case 2:
-			mesh_increment_target_address();
-
-			if (mesh_target > 0x0009) {
-				printk("A");
-			} else {
-				printk("%x", (mesh_target & 0xf));
-			}
 			break;
 		case 3:
-			mesh_send_message(MESH_MESSAGE_STRING, test_string, 13);
+			mesh_send_message(MESH_MESSAGE_STRING, MESH_GROUP_ADDR, test_string, 13);
 			break;
 		case 4:
-		default:
 			break;
+		default:
+			printk("Button not supported.\n");
 	}
 }
 
-void on_message_received(u32_t message_type, const void* message, u16_t len)
+void on_message_received(u32_t message_type, u16_t address, const void* message, u16_t len)
 {
-	printk("Status: %s\n", (char*) message);
-	display_set_status_message(message);
+	printk("Received message: Type: %d Address: 0x%04x Content: %s\n", message_type, address, (char*) message);
+
+	switch(message_type) {
+		case MESH_MESSAGE_BUTTON:
+			printk("Received Button Press.\n");
+			break;
+		case MESH_MESSAGE_STRING:
+			printk("Received String: %s\n", (char*) message);
+			break;
+		default:
+			printk("Message type not supported.\n");
+	}
 }
 
 void on_heartbeat(u16_t hops)
@@ -76,8 +80,8 @@ void main(void)
 	}
 
 	if (!err) {
-		printk("Address: 0x%04x\n", mesh_addr);
-		display_set_status_address(mesh_addr);
+		printk("Address: 0x%04x\n", MESH_NODE_ADDR);
+		display_set_status_address(MESH_NODE_ADDR);
 
 		printk("Status: Initialized\n");
 		display_set_status_message("Initialized");

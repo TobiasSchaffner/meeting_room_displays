@@ -5,17 +5,12 @@
 
 #include "mesh.h"
 
-#if !defined(NODE_ADDR)
-#define NODE_ADDR 0x0b0c
-#endif
-
 #define MOD_LF 0x0000
 
-#define GROUP_ADDR 0xc000
 #define PUBLISHER_ADDR  0x000f
 
-u16_t mesh_addr = NODE_ADDR;
-u16_t mesh_target = GROUP_ADDR;
+u16_t mesh_addr = MESH_NODE_ADDR;
+u16_t mesh_target = MESH_GROUP_ADDR;
 
 static const u8_t net_key[16] = {
 	0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
@@ -84,15 +79,12 @@ static struct bt_mesh_model root_models[] = {
 };
 
 static void message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf, u32_t opcode) {
-	printk(" Received message from 0x%04x.\n", ctx->addr);
-
 	// Check if we received our own message
 	if (ctx->addr == bt_mesh_model_elem(model)->addr) {
 		printk("Ignored message as 0x%04x is our own address.\n", bt_mesh_model_elem(model)->addr);
 		return;
 	}
-
-    on_message_received(opcode, buf->data, buf->len);
+    on_message_received(opcode, ctx->addr, buf->data, buf->len);
 }
 
 static void day_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
@@ -134,27 +126,12 @@ static const struct bt_mesh_comp comp = {
 	.elem_count = ARRAY_SIZE(elements),
 };
 
-void mesh_increment_target_address(void)
-{
-	switch (mesh_target) {
-	case GROUP_ADDR:
-		mesh_target = 1U;
-		break;
-	case 9:
-		mesh_target = GROUP_ADDR;
-		break;
-	default:
-		mesh_target++;
-		break;
-	}
-}
-
-void mesh_send_message(u32_t message_type, const void* message, u16_t len) {
+void mesh_send_message(u32_t message_type, u16_t address, const void* message, u16_t len) {
 	NET_BUF_SIMPLE_DEFINE(msg, 3 + len + 4);
 	struct bt_mesh_msg_ctx ctx = {
 		.net_idx = net_idx,
 		.app_idx = app_idx,
-		.addr = mesh_target,
+		.addr = address,
 		.send_ttl = BT_MESH_TTL_DEFAULT,
 	};
 	
@@ -186,13 +163,13 @@ static void configure(void)
 				 BT_MESH_MODEL_ID_HEALTH_SRV, NULL);
 
 	/* Add model subscription */
-	bt_mesh_cfg_mod_sub_add_vnd(net_idx, mesh_addr, mesh_addr, GROUP_ADDR,
+	bt_mesh_cfg_mod_sub_add_vnd(net_idx, mesh_addr, mesh_addr, MESH_GROUP_ADDR,
 				    MOD_LF, BT_COMP_ID_LF, NULL);
 
-#if NODE_ADDR == PUBLISHER_ADDR
+#if MESH_NODE_ADDR == PUBLISHER_ADDR
 	{
 		struct bt_mesh_cfg_hb_pub pub = {
-			.dst = GROUP_ADDR,
+			.dst = MESH_GROUP_ADDR,
 			.count = 0xff,
 			.period = 0x05,
 			.ttl = 0x07,
@@ -248,7 +225,7 @@ static void bt_ready(int err)
 		configure();
 	}
 
-#if NODE_ADDR != PUBLISHER_ADDR
+#if MESH_NODE_ADDR != PUBLISHER_ADDR
 	/* Heartbeat subcscription is a temporary state (due to there
 	 * not being an "indefinite" value for the period, so it never
 	 * gets stored persistently. Therefore, we always have to configure
@@ -257,7 +234,7 @@ static void bt_ready(int err)
 	{
 		struct bt_mesh_cfg_hb_sub sub = {
 			.src = PUBLISHER_ADDR,
-			.dst = GROUP_ADDR,
+			.dst = MESH_GROUP_ADDR,
 			.period = 0x10,
 		};
 
