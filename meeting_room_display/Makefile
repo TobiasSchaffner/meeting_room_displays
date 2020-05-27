@@ -1,8 +1,14 @@
 all: build-all flash-all
 
-build-all: build-display build-node build-sender
+build-all: build-display build-node build-sender build-dongle
 
 flash-all: flash-display flash-node flash-sender
+
+clean-all:
+	rm -rf build-display
+	rm -rf build-node
+	rm -rf build-sender
+	rm -rf build-dongle
 
 display: build-display flash-display
 
@@ -19,7 +25,9 @@ flash-display:
 node: build-node flash-node
 
 build-node:
-	west build -b nrf52840_pca10056 -d node-build -p auto . -- -DMESH_NODE_ADDR=0x030d
+	west build -b nrf52840_pca10056 -d node-build -p auto . -- \
+		-DOVERLAY_CONFIG="debug.conf" \
+		-DMESH_NODE_ADDR=0x030d
 
 flash-node:
 	@echo ">>>>>>>>NODE<<<<<<<<"
@@ -29,7 +37,9 @@ sender: build-sender flash-sender
 
 build-sender:
 	@echo ">>>>>>>>SENDER<<<<<<<<"
-	west build -b nrf52840_pca10056 -d sender-build -p auto . -- -DMESH_NODE_ADDR=0x000f
+	west build -b nrf52840_pca10056 -d sender-build -p auto . -- \
+		-DOVERLAY_CONFIG="debug.conf" \
+		-DMESH_NODE_ADDR=0x000f
 
 flash-sender:
 	west flash -d sender-build
@@ -37,13 +47,14 @@ flash-sender:
 dongle: build-dongle flash-dongle
 
 build-dongle:
-	@echo ">>>>>>>>SENDER<<<<<<<<"
-	export SHIELD=""
-	export BOARD=nrf52840_pca10059
-	west build -b nrf52840_pca10059 -d dongle-build -p auto . -- -DSHIELD="" -DMESH_NODE_ADDR=0x000f
+	@echo ">>>>>>>>DONGLE<<<<<<<<"
+	west build -b nrf52840_pca10059 -d dongle-build -p auto . -- \
+		-DSHIELD=""
+		-DOVERLAY_CONFIG="debug.conf" \
+		-DMESH_NODE_ADDR=0x000f
 	nrfutil pkg generate --hw-version 52 --sd-req=0x00 \
         --application dongle-build/zephyr/zephyr.hex \
         --application-version 1 dongle-build/dongle.zip
 
 flash-dongle:
-	nrfutil dfu usb-serial -pkg dongle.zip -p /dev/ttyACM1
+	nrfutil dfu usb-serial -pkg dongle-build/dongle.zip -p /dev/ttyACM1

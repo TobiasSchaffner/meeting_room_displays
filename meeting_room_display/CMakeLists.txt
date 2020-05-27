@@ -7,8 +7,12 @@ include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 project(mesh_demo)
 
 target_sources(app PRIVATE src/main.c)
-target_sources(app PRIVATE src/gpio.c)
 target_sources(app PRIVATE src/mesh.c)
+
+if(BOARD_NRF52840_PCA10056)
+  target_sources(app PRIVATE src/gpio.c)
+endif()
+
 if(CONFIG_DISPLAY)
   target_sources(app PRIVATE src/display.c)
 endif()
