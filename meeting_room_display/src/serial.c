@@ -43,6 +43,7 @@ struct ring_buf ringbuf;
 static void interrupt_handler(struct device *dev)
 {
 	while (uart_irq_update(dev) && uart_irq_is_pending(dev)) {
+        
 		if (uart_irq_rx_ready(dev)) {
 			int recv_len, rb_len;
 			u8_t buffer[64];
@@ -51,12 +52,7 @@ static void interrupt_handler(struct device *dev)
 
 			recv_len = uart_fifo_read(dev, buffer, len);
 
-			rb_len = ring_buf_put(&ringbuf, buffer, recv_len);
-			if (rb_len < recv_len) {
-				LOG_ERR("Drop %u bytes", recv_len - rb_len);
-			}
-
-			LOG_DBG("tty fifo -> ringbuf %d bytes", rb_len);
+            printf("%s", buffer); // work to do
 
 			uart_irq_tx_enable(dev);
 		}
