@@ -75,6 +75,10 @@ void on_message_received(u32_t message_type, u16_t address, const void* message,
 	}
 }
 
+void on_serial_message_received(const void* message, u16_t len) {
+	printk("%s", message);
+}
+
 void on_heartbeat(u16_t hops)
 {
 	printk("Hops: %d\n", hops);
