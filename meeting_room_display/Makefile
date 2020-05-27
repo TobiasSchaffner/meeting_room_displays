@@ -26,6 +26,7 @@ node: build-node flash-node
 
 build-node:
 	west build -b nrf52840_pca10056 -d node-build -p auto . -- \
+		-DSHIELD="" \
 		-DOVERLAY_CONFIG="debug.conf" \
 		-DMESH_NODE_ADDR=0x030d
 
@@ -38,6 +39,7 @@ sender: build-sender flash-sender
 build-sender:
 	@echo ">>>>>>>>SENDER<<<<<<<<"
 	west build -b nrf52840_pca10056 -d sender-build -p auto . -- \
+		-DSHIELD="" \
 		-DOVERLAY_CONFIG="debug.conf" \
 		-DMESH_NODE_ADDR=0x000f
 
@@ -49,8 +51,8 @@ dongle: build-dongle flash-dongle
 build-dongle:
 	@echo ">>>>>>>>DONGLE<<<<<<<<"
 	west build -b nrf52840_pca10059 -d dongle-build -p auto . -- \
-		-DSHIELD=""
-		-DOVERLAY_CONFIG="debug.conf" \
+		-DSHIELD="" \
+		-DOVERLAY_CONFIG="serial.conf debug.conf" \
 		-DMESH_NODE_ADDR=0x000f
 	nrfutil pkg generate --hw-version 52 --sd-req=0x00 \
         --application dongle-build/zephyr/zephyr.hex \

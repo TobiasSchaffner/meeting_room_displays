@@ -14,6 +14,7 @@
 
 #include "mesh.h"
 #include "gpio.h"
+#include "serial.h"
 #include "display.h"
 #include "message.h"
 
@@ -84,19 +85,22 @@ void main(void)
 {
 	int err = 0;
 	printk("Status: Initializing\n");
-	
-	err = display_init();	
 
-	if (!err) {
+	if (!err)
+		err = serial_init();
+
+	if (!err)
+		err = display_init();	
+
+	if (!err)
 		err = gpio_init();
 
-		if (!err)
-			err = mesh_init();
+	if (!err)
+		err = mesh_init();
 
-		if (err) {
-			printk("Status: Error\n");
-			display_set_status_message("Error");
-		}
+	if (err) {
+		printk("Status: Error\n");
+		display_set_status_message("Error");
 	}
 
 	if (!err) {

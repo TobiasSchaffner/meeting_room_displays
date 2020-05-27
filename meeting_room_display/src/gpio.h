@@ -1,7 +1,7 @@
 #ifndef GPIO_H
 #define GPIO_H
 
-#if defined(BOARD_NRF52840_PCA10056)
+#if !defined(CONFIG_USB_CDC_ACM)
 int gpio_init(void);
 
 // Callbacks for buttons to be defined by user.
