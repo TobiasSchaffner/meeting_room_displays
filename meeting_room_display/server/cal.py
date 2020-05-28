@@ -4,7 +4,7 @@ import os
 
 import config
 
-authenticate = False
+authenticate = True
 
 class Calendar():
 
