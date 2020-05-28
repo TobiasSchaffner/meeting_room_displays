@@ -8,3 +8,5 @@ displays = {
     0x030c: '0.001',
     0x030d: '0.002'
 }
+
+dongle_port = '/dev/ttyACM0'
