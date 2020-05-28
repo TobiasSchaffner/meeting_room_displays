@@ -2,3 +2,5 @@ display-build/
 node-build/
 sender-build/
 dongle-build/
+server/config.py
+server/o365_token.txt

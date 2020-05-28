@@ -1,0 +1,10 @@
+# Move this file to config.py
+
+# Office 365 credentials
+credentials = ('my_client_id', 'my_client_secret')
+
+# Displays address to room name mapping
+displays = {
+    0x030c: '0.001',
+    0x030d: '0.002'
+}
