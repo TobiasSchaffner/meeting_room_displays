@@ -15,7 +15,7 @@ display: build-display flash-display
 build-display:
 	west build -b nrf52840_pca10056 -d display-build -p auto . -- \
 		-DSHIELD=waveshare_epaper_gdew075t7 \
-		-DOVERLAY_CONFIG="display.conf debug.conf" \
+		-DOVERLAY_CONFIG="display.conf" \
 		-DMESH_NODE_ADDR=0x030c
 
 flash-display:
@@ -59,4 +59,4 @@ build-dongle:
         --application-version 1 dongle-build/dongle.zip
 
 flash-dongle:
-	nrfutil dfu usb-serial -pkg dongle-build/dongle.zip -p /dev/ttyACM1
+	nrfutil dfu usb-serial -pkg dongle-build/dongle.zip -p /dev/ttyDisplayDongle

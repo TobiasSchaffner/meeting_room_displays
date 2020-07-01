@@ -1,10 +1,8 @@
-from O365 import Account, FileSystemTokenBackend, MSOffice365Protocol
+from O365 import Connection, Account, FileSystemTokenBackend, MSOffice365Protocol
 import datetime
 import os
 
 import config
-
-authenticate = True
 
 class Calendar():
 
@@ -13,9 +11,16 @@ class Calendar():
 
     def _authenticate(self):
         token_backend = FileSystemTokenBackend(token_path=os.path.dirname(os.path.realpath(__file__)))
-        account = Account(config.credentials, scopes=['Calendars.Read'], token_backend=token_backend)
-        if authenticate and account.authenticate():
-            print('Authenticated!')
+        connection = Connection(config.credentials, scopes=['basic', 'Calendars.Read'], token_backend=token_backend)
+        connection.refresh_token()
+        account = Account(config.credentials, scopes=['basic', 'Calendars.Read'], token_backend=token_backend)
+
+        if not account.is_authenticated:
+            if account.authenticate():
+                print('Authenticated!')
+            else:
+                print('Authentication failed!')
+                return
         self._schedule = account.schedule()
 
     def get_events(self, room: str, start: int=8, end: int=18) -> []:

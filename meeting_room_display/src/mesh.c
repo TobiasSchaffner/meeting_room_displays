@@ -4,10 +4,12 @@
 #include <settings/settings.h>
 
 #include "mesh.h"
+#include "message.h"
 
 #define MOD_LF 0x0000
 
 #define PUBLISHER_ADDR  0x000f
+#define MESH_MESSAGE_TYPE(type)			BT_MESH_MODEL_OP_3(type, BT_COMP_ID_LF)
 
 u16_t mesh_addr = MESH_NODE_ADDR;
 u16_t mesh_target = MESH_GROUP_ADDR;
@@ -32,7 +34,7 @@ static u8_t flags;
 
 static void heartbeat(u8_t hops, u16_t feat)
 {
-    on_heartbeat(hops);
+    on_mesh_heartbeat(hops);
 }
 
 static struct bt_mesh_cfg_srv cfg_srv = {
@@ -84,30 +86,33 @@ static void message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx
 		printk("Ignored message as 0x%04x is our own address.\n", bt_mesh_model_elem(model)->addr);
 		return;
 	}
-    on_message_received(opcode, ctx->addr, buf->data, buf->len);
+    on_mesh_message_received(opcode, ctx->addr, buf->data, buf->len);
 }
 
+static void ok_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
+	message_received(model, ctx, buf, MESSAGE_OK);}
 static void day_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
-	message_received(model, ctx, buf, MESH_MESSAGE_DAY);}
+	message_received(model, ctx, buf, MESSAGE_DAY);}
 static void room_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
-	message_received(model, ctx, buf, MESH_MESSAGE_ROOM);}
+	message_received(model, ctx, buf, MESSAGE_ROOM);}
 static void appointment_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
-	message_received(model, ctx, buf, MESH_MESSAGE_APPOINTMENT);}
+	message_received(model, ctx, buf, MESSAGE_APPOINTMENT);}
 static void clear_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
-	message_received(model, ctx, buf, MESH_MESSAGE_APPOINTMENTS_CLEAR);}
+	message_received(model, ctx, buf, MESSAGE_APPOINTMENTS_CLEAR);}
 static void string_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
-	message_received(model, ctx, buf, MESH_MESSAGE_STRING);}
+	message_received(model, ctx, buf, MESSAGE_STRING);}
 static void button_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
-	message_received(model, ctx, buf, MESH_MESSAGE_BUTTON);}
+	message_received(model, ctx, buf, MESSAGE_BUTTON);}
 
 static const struct bt_mesh_model_op vnd_ops[] = {
-	{ MESH_MESSAGE_DAY, 0, day_message_received },
-	{ MESH_MESSAGE_ROOM, 0, room_message_received },
-	{ MESH_MESSAGE_APPOINTMENT, 0, appointment_message_received },
-	{ MESH_MESSAGE_APPOINTMENTS_CLEAR, 0, clear_message_received },
+	{ MESH_MESSAGE_TYPE(MESSAGE_OK), 0, ok_message_received },
+	{ MESH_MESSAGE_TYPE(MESSAGE_DAY), 0, day_message_received },
+	{ MESH_MESSAGE_TYPE(MESSAGE_ROOM), 0, room_message_received },
+	{ MESH_MESSAGE_TYPE(MESSAGE_APPOINTMENT), 0, appointment_message_received },
+	{ MESH_MESSAGE_TYPE(MESSAGE_APPOINTMENTS_CLEAR), 0, clear_message_received },
 
-	{ MESH_MESSAGE_STRING, 0, string_message_received },
-	{ MESH_MESSAGE_BUTTON, 0, button_message_received },
+	{ MESH_MESSAGE_TYPE(MESSAGE_STRING), 0, string_message_received },
+	{ MESH_MESSAGE_TYPE(MESSAGE_BUTTON), 0, button_message_received },
 
 	BT_MESH_MODEL_OP_END,
 };
@@ -126,7 +131,7 @@ static const struct bt_mesh_comp comp = {
 	.elem_count = ARRAY_SIZE(elements),
 };
 
-void mesh_send_message(u32_t message_type, u16_t address, const void* message, u16_t len) {
+void mesh_message_send(u32_t message_type, u16_t address, const void* payload, u16_t len) {
 	NET_BUF_SIMPLE_DEFINE(msg, 3 + len + 4);
 	struct bt_mesh_msg_ctx ctx = {
 		.net_idx = net_idx,
@@ -135,15 +140,15 @@ void mesh_send_message(u32_t message_type, u16_t address, const void* message, u
 		.send_ttl = BT_MESH_TTL_DEFAULT,
 	};
 	
-	bt_mesh_model_msg_init(&msg, message_type);
+	bt_mesh_model_msg_init(&msg, MESH_MESSAGE_TYPE(message_type));
 
-	if (len != 0 && message != NULL)
-		net_buf_simple_add_mem(&msg, message, len);
+	if (len != 0 && payload != NULL)
+		net_buf_simple_add_mem(&msg, payload, len);
 
 	if (bt_mesh_model_send(&vnd_models[0], &ctx, &msg, NULL, NULL) == 0) {
-		printk("Saying \"hi!\" to everyone\n");
+		printk("Sending Mesh Message Type: %d Address: %d!\n", message_type, address);
 	} else {
-		printk("Sending Failed!\n");
+		printk("Sending Mesh Failed!\n");
 	}
 }
 

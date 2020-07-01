@@ -4,9 +4,15 @@ import dongle
 import config
 
 calendar = cal.Calendar()
-dongle = dongle.Dongle()
 
-for address, room in config.displays.items():
-    print(f"Room {room}")
-    for event in calendar.get_events(room):
-        dongle.send_appointment(address, event.start, event.end, event.subject)
+try:
+    dongle = dongle.Dongle()
+
+    for address, room in config.displays.items():
+        print(f"Room {room}, Address: {address}")
+        for event in calendar.get_events(room):
+            print(event)
+            dongle.send_appointment(address, event.start, event.end, event.subject + "\x00")
+
+except KeyboardInterrupt:
+    dongle.disconnect()
