@@ -19,7 +19,7 @@
 
 static K_SEM_DEFINE(semaphore, 0, 1);
 
-void on_button_press(u32_t button)
+void on_button_press(uint32_t button)
 {
 	switch(button) {
 		case 1:
@@ -36,7 +36,7 @@ void on_button_press(u32_t button)
 	}
 }
 
-void on_mesh_message_received(u32_t message_type, u16_t src_address, const void* payload, u16_t len)
+void on_mesh_message_received(uint32_t message_type, uint16_t src_address, const void* payload, uint16_t len)
 {
 	switch(message_type) {
 		case MESSAGE_OK:
@@ -69,11 +69,11 @@ void on_mesh_message_received(u32_t message_type, u16_t src_address, const void*
 	}
 }
 
-void on_serial_message_received(u32_t message_type, u16_t dst_address, const void* payload, u16_t len) {
+void on_serial_message_received(uint32_t message_type, uint16_t dst_address, const void* payload, uint16_t len) {
 	mesh_message_send(message_type, dst_address, payload, len);
 }
 
-void on_mesh_heartbeat(u16_t hops)
+void on_mesh_heartbeat(uint16_t hops)
 {
 	printk("Hops: %d\n", hops);
 	display_set_status_heartbeat(hops);

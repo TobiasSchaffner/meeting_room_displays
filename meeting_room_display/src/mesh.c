@@ -11,28 +11,28 @@
 #define PUBLISHER_ADDR  0x000f
 #define MESH_MESSAGE_TYPE(type)			BT_MESH_MODEL_OP_3(type, BT_COMP_ID_LF)
 
-u16_t mesh_addr = MESH_NODE_ADDR;
-u16_t mesh_target = MESH_GROUP_ADDR;
+uint16_t mesh_addr = MESH_NODE_ADDR;
+uint16_t mesh_target = MESH_GROUP_ADDR;
 
-static const u8_t net_key[16] = {
+static const uint8_t net_key[16] = {
 	0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
 	0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
 };
-static const u8_t dev_key[16] = {
+static const uint8_t dev_key[16] = {
 	0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
 	0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
 };
-static const u8_t app_key[16] = {
+static const uint8_t app_key[16] = {
 	0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
 	0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
 };
 
-static const u16_t net_idx;
-static const u16_t app_idx;
-static const u32_t iv_index;
-static u8_t flags;
+static const uint16_t net_idx;
+static const uint16_t app_idx;
+static const uint32_t iv_index;
+static uint8_t flags;
 
-static void heartbeat(u8_t hops, u16_t feat)
+static void heartbeat(uint8_t hops, uint16_t feat)
 {
     on_mesh_heartbeat(hops);
 }
@@ -80,7 +80,7 @@ static struct bt_mesh_model root_models[] = {
 	BT_MESH_MODEL_HEALTH_SRV(&health_srv, &health_pub),
 };
 
-static void message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf, u32_t opcode) {
+static void message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf, uint32_t opcode) {
 	// Check if we received our own message
 	if (ctx->addr == bt_mesh_model_elem(model)->addr) {
 		printk("Ignored message as 0x%04x is our own address.\n", bt_mesh_model_elem(model)->addr);
@@ -131,7 +131,7 @@ static const struct bt_mesh_comp comp = {
 	.elem_count = ARRAY_SIZE(elements),
 };
 
-void mesh_message_send(u32_t message_type, u16_t address, const void* payload, u16_t len) {
+void mesh_message_send(uint32_t message_type, uint16_t address, const void* payload, uint16_t len) {
 	NET_BUF_SIMPLE_DEFINE(msg, 3 + len + 4);
 	struct bt_mesh_msg_ctx ctx = {
 		.net_idx = net_idx,
@@ -189,7 +189,7 @@ static void configure(void)
 	printk("Configuration complete.\n");
 }
 
-static const u8_t dev_uuid[16] = { 0xdd, 0xdd };
+static const uint8_t dev_uuid[16] = { 0xdd, 0xdd };
 
 static const struct bt_mesh_prov prov = {
 	.uuid = dev_uuid,

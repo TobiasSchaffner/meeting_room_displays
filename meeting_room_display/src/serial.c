@@ -17,20 +17,20 @@ LOG_MODULE_REGISTER(cdc_acm_echo, LOG_LEVEL_INF);
 #define MESSAGE_MIN_LEN				    8
 
 char buffer[BUF_SIZE];
-u16_t bytes_read = 0;
+uint16_t bytes_read = 0;
 
 struct device *dev;
 
 typedef struct serial_message
 {
     char begin[3];
-    u8_t length;
-    u16_t address;
-    u16_t type;
-    u8_t payload[];
+    uint8_t length;
+    uint16_t address;
+    uint16_t type;
+    uint8_t payload[];
 } serial_message;
 
-static void serial_message_received(u32_t message_type, u16_t dst_address, const void* payload, u16_t len) {
+static void serial_message_received(uint32_t message_type, uint16_t dst_address, const void* payload, uint16_t len) {
 	printk("Received Serial Message Type %d: Address: %d Len: %d\n", message_type, dst_address, len);
 	on_serial_message_received(message_type, dst_address, payload, len);
 }
@@ -70,10 +70,10 @@ static void interrupt_handler(struct device *dev)
 	}
 }
 
-void serial_message_send(u32_t message_type, u16_t address, const void* payload, u16_t len)
+void serial_message_send(uint32_t message_type, uint16_t address, const void* payload, uint16_t len)
 {
-	u32_t buf_size = sizeof(serial_message) + len;
-	u8_t buf[buf_size];
+	uint32_t buf_size = sizeof(serial_message) + len;
+	uint8_t buf[buf_size];
 
 	serial_message* message = (serial_message*) &buf;
 	memcpy(buf, MESSAGE_SERIAL_BEGIN, 3);
@@ -87,7 +87,7 @@ void serial_message_send(u32_t message_type, u16_t address, const void* payload,
 
 int serial_init(void)
 {
-	u32_t dtr = 0U;
+	uint32_t dtr = 0U;
 	int ret;
 
 	printk("Enabling USB");

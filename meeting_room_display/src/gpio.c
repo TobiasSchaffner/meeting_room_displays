@@ -31,7 +31,7 @@ static void button_4_pressed(struct k_work *work){
 	on_button_press(4);}
 
 static void button_pressed(struct device *dev, struct gpio_callback *cb,
-			   u32_t pins)
+			   uint32_t pins)
 {
 	if (pins & BIT(DT_ALIAS_SW0_GPIOS_PIN)) {
 		k_work_submit(&button_1_work);}

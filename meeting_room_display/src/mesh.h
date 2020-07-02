@@ -15,10 +15,10 @@
 int mesh_init(void);
 
 void mesh_increment_target_address(void);
-void mesh_message_send(u32_t message_type, u16_t dst_address, const void* payload, u16_t len);
+void mesh_message_send(uint32_t message_type, uint16_t dst_address, const void* payload, uint16_t len);
 
 // Callbacks to be defined by main
-void on_mesh_message_received(u32_t message_type, u16_t src_address, const void* payload, u16_t len);
-void on_mesh_heartbeat(u16_t hops);
+void on_mesh_message_received(uint32_t message_type, uint16_t src_address, const void* payload, uint16_t len);
+void on_mesh_heartbeat(uint16_t hops);
 
 #endif

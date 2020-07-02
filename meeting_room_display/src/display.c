@@ -239,13 +239,13 @@ void display_set_status_message(const char* message) {
     lv_task_handler();
 }
 
-void display_set_status_address(u16_t address) {
+void display_set_status_address(uint16_t address) {
     snprintf(status_address_message, 20, "Address: 0x%04x", address);
     lv_label_set_text(status_address_label, status_address_message);
     lv_task_handler();
 }
 
-void display_set_status_heartbeat(u16_t hops) {
+void display_set_status_heartbeat(uint16_t hops) {
     snprintf(status_heartbeat_message, 20, "Hops: %d", hops);
     lv_label_set_text(status_heartbeat_label, status_heartbeat_message);
     lv_task_handler();
