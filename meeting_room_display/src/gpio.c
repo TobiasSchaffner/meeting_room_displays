@@ -14,6 +14,33 @@
 
 #include "gpio.h"
 
+
+#define FLAGS_OR_ZERO(node)						\
+	COND_CODE_1(DT_PHA_HAS_CELL(node, gpios, flags),		\
+		    (DT_GPIO_FLAGS(node, gpios)),			\
+		    (0))
+
+#define SW0_NODE	DT_ALIAS(sw0)
+#define SW0_GPIO_LABEL	DT_GPIO_LABEL(SW0_NODE, gpios)
+#define SW0_GPIO_PIN	DT_GPIO_PIN(SW0_NODE, gpios)
+#define SW0_GPIO_FLAGS	(GPIO_INPUT | FLAGS_OR_ZERO(SW0_NODE))
+
+#define SW1_NODE	DT_ALIAS(sw1)
+#define SW1_GPIO_LABEL	DT_GPIO_LABEL(SW1_NODE, gpios)
+#define SW1_GPIO_PIN	DT_GPIO_PIN(SW1_NODE, gpios)
+#define SW1_GPIO_FLAGS	(GPIO_INPUT | FLAGS_OR_ZERO(SW1_NODE))
+
+#define SW2_NODE	DT_ALIAS(sw2)
+#define SW2_GPIO_LABEL	DT_GPIO_LABEL(SW2_NODE, gpios)
+#define SW2_GPIO_PIN	DT_GPIO_PIN(SW2_NODE, gpios)
+#define SW2_GPIO_FLAGS	(GPIO_INPUT | FLAGS_OR_ZERO(SW2_NODE))
+
+#define SW3_NODE	DT_ALIAS(sw3)
+#define SW3_GPIO_LABEL	DT_GPIO_LABEL(SW3_NODE, gpios)
+#define SW3_GPIO_PIN	DT_GPIO_PIN(SW3_NODE, gpios)
+#define SW3_GPIO_FLAGS	(GPIO_INPUT | FLAGS_OR_ZERO(SW3_NODE))
+
+
 static struct device *gpio;
 
 static struct k_work button_1_work;
@@ -33,13 +60,13 @@ static void button_4_pressed(struct k_work *work){
 static void button_pressed(struct device *dev, struct gpio_callback *cb,
 			   uint32_t pins)
 {
-	if (pins & BIT(DT_ALIAS_SW0_GPIOS_PIN)) {
+	if (pins & BIT(SW0_GPIO_PIN)) {
 		k_work_submit(&button_1_work);}
-	else if (pins & BIT(DT_ALIAS_SW1_GPIOS_PIN)) {
+	else if (pins & BIT(SW1_GPIO_PIN)) {
 		k_work_submit(&button_2_work);}
-	else if (pins & BIT(DT_ALIAS_SW2_GPIOS_PIN)) {
+	else if (pins & BIT(SW2_GPIO_PIN)) {
 		k_work_submit(&button_3_work);}
-	else if (pins & BIT(DT_ALIAS_SW3_GPIOS_PIN)) {
+	else if (pins & BIT(SW3_GPIO_PIN)) {
 		k_work_submit(&button_4_work);}
 	else {
 		printk("Unexpected button press.\n");}
@@ -54,31 +81,31 @@ static void configure_buttons(void)
 	k_work_init(&button_3_work, button_3_pressed);
 	k_work_init(&button_4_work, button_4_pressed);
 
-	gpio = device_get_binding(DT_ALIAS_SW0_GPIOS_CONTROLLER);
+	gpio = device_get_binding(SW0_GPIO_LABEL);
 
-	gpio_pin_configure(gpio, DT_ALIAS_SW0_GPIOS_PIN,
-			   GPIO_INPUT | DT_ALIAS_SW0_GPIOS_FLAGS);
-	gpio_pin_interrupt_configure(gpio, DT_ALIAS_SW0_GPIOS_PIN,
+	gpio_pin_configure(gpio, SW0_GPIO_PIN,
+			   GPIO_INPUT | SW0_GPIO_FLAGS);
+	gpio_pin_interrupt_configure(gpio, SW0_GPIO_PIN,
 				     GPIO_INT_EDGE_TO_ACTIVE);
 
-	gpio_pin_configure(gpio, DT_ALIAS_SW1_GPIOS_PIN,
-			   GPIO_INPUT | DT_ALIAS_SW1_GPIOS_FLAGS);
-	gpio_pin_interrupt_configure(gpio, DT_ALIAS_SW1_GPIOS_PIN,
+	gpio_pin_configure(gpio, SW1_GPIO_PIN,
+			   GPIO_INPUT | SW1_GPIO_FLAGS);
+	gpio_pin_interrupt_configure(gpio, SW1_GPIO_PIN,
 				     GPIO_INT_EDGE_TO_ACTIVE);
 
-	gpio_pin_configure(gpio, DT_ALIAS_SW2_GPIOS_PIN,
-			   GPIO_INPUT | DT_ALIAS_SW2_GPIOS_FLAGS);
-	gpio_pin_interrupt_configure(gpio, DT_ALIAS_SW2_GPIOS_PIN,
+	gpio_pin_configure(gpio, SW2_GPIO_PIN,
+			   GPIO_INPUT | SW2_GPIO_FLAGS);
+	gpio_pin_interrupt_configure(gpio, SW2_GPIO_PIN,
 				     GPIO_INT_EDGE_TO_ACTIVE);
 
-	gpio_pin_configure(gpio, DT_ALIAS_SW3_GPIOS_PIN,
-			   GPIO_INPUT | DT_ALIAS_SW3_GPIOS_FLAGS);
-	gpio_pin_interrupt_configure(gpio, DT_ALIAS_SW3_GPIOS_PIN,
+	gpio_pin_configure(gpio, SW3_GPIO_PIN,
+			   GPIO_INPUT | SW3_GPIO_FLAGS);
+	gpio_pin_interrupt_configure(gpio, SW3_GPIO_PIN,
 				     GPIO_INT_EDGE_TO_ACTIVE);
 
 	gpio_init_callback(&button_cb, button_pressed,
-			   BIT(DT_ALIAS_SW0_GPIOS_PIN) | BIT(DT_ALIAS_SW1_GPIOS_PIN) |
-			   BIT(DT_ALIAS_SW2_GPIOS_PIN) | BIT(DT_ALIAS_SW3_GPIOS_PIN));
+			   BIT(SW0_GPIO_PIN) | BIT(SW1_GPIO_PIN) |
+			   BIT(SW2_GPIO_PIN) | BIT(SW3_GPIO_PIN));
 	gpio_add_callback(gpio, &button_cb);
 }
 
