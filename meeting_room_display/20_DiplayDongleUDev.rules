@@ -1,1 +1,2 @@
 SUBSYSTEM=="tty", ATTRS{product}=="LowPowerDisplayDongle", SYMLINK+="ttyDisplayDongle"
+SUBSYSTEM=="tty", ATTRS{serial}=="D031AC204E0C", SYMLINK+="ttyDisplayDongle"
