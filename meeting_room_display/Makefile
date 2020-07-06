@@ -50,7 +50,7 @@ dongle: build-dongle flash-dongle
 build-dongle:
 	@echo ">>>>>>>>DONGLE<<<<<<<<"
 	west build -b nrf52840dongle_nrf52840 -d dongle-build -p auto . -- \
-		-DOVERLAY_CONFIG="serial.conf debug.conf" \
+		-DOVERLAY_CONFIG="serial.conf" \
 		-DMESH_NODE_ADDR=0x000f
 	nrfutil pkg generate --hw-version 52 --sd-req=0x00 \
         --application dongle-build/zephyr/zephyr.hex \
