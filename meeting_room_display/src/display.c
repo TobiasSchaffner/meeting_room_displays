@@ -32,18 +32,22 @@ static lv_style_t style_window;
 // Main Window
 static lv_obj_t* main_window;
 
+static lv_obj_t* main_room_label;
 static lv_obj_t* main_logo;
+
+static char main_room_message[24] = {0};
 
 // Status Window
 static lv_obj_t* status_window;
+static lv_style_t style_status_window;
 
 static lv_obj_t* status_address_label;
 static lv_obj_t* status_message_label;
 static lv_obj_t* status_heartbeat_label;
 
-static char status_address_message[20] = {0};
-static char status_message_message[20] = {0};
-static char status_heartbeat_message[20] = {0};
+static char status_address_message[24] = {0};
+static char status_message_message[24] = {0};
+static char status_heartbeat_message[24] = {0};
 
 // Calendar Windows
 static lv_obj_t* calendar_window;
@@ -51,6 +55,8 @@ static lv_obj_t* calendar_window;
 static lv_style_t style_header;
 static lv_obj_t* calendar_header;
 static lv_obj_t* calendar_header_label;
+
+static char calender_header_message[24] = {0};
 
 // Time Slots
 static lv_style_t style_time_slot;
@@ -69,6 +75,10 @@ static lv_obj_t* calendar_appointment_labels[10];
 static void create_styles(void) {
     lv_style_copy(&style_window, &lv_style_plain);
     style_window.body.border.width = 3;
+    style_window.text.font = &lv_font_roboto_28;
+
+    lv_style_copy(&style_status_window, &lv_style_plain);
+    style_status_window.body.border.width = 3;
 
     lv_style_copy(&style_header, &lv_style_plain);
     style_header.body.border.width = 1;
@@ -90,7 +100,7 @@ static void create_styles(void) {
 static void set_styles(void) {
     lv_obj_set_style(calendar_window, &style_window);
     lv_obj_set_style(main_window, &style_window);
-    lv_obj_set_style(status_window, &style_window);
+    lv_obj_set_style(status_window, &style_status_window);
 
     lv_task_handler();
 }
@@ -107,6 +117,10 @@ static void create_main_window() {
     main_window = lv_obj_create(wallpaper, NULL);
     lv_obj_set_size(main_window, WINDOW_WIDTH, 360);
     lv_obj_align(main_window, NULL, LV_ALIGN_IN_TOP_RIGHT, -20, 20);
+
+    main_room_label = lv_label_create(main_window, NULL);
+    lv_label_set_text(main_room_label, "Room: 1.105");
+    lv_obj_align(main_room_label, NULL, LV_ALIGN_IN_TOP_LEFT, 20, 20);
 
     LV_IMG_DECLARE(mixedmode);
     main_logo = lv_img_create(main_window, NULL);
@@ -145,7 +159,7 @@ static void create_calendar(void) {
     lv_obj_align(calendar_header, NULL, LV_ALIGN_IN_TOP_LEFT, 2, 2);
 
 	calendar_header_label = lv_label_create(calendar_header, NULL);
-    lv_label_set_text(calendar_header_label, "Montag, 19.02.20");
+    lv_label_set_text(calendar_header_label, "Montag, 01.01.20");
     lv_obj_align(calendar_header_label, NULL, LV_ALIGN_CENTER, 0, 0);
 
 
@@ -167,6 +181,33 @@ static void create_calendar(void) {
 		sprintf(buffer, "%02d:00", 8 + time_slot);
         lv_label_set_text(calendar_time_slot_labels[time_slot], buffer);
     }
+}
+
+static void create_windows(void) {
+    create_wallpaper();
+    create_calendar();
+    create_main_window();
+    create_status_window();
+    lv_task_handler();
+}
+
+int display_init(void)
+{
+	display_dev = device_get_binding(CONFIG_LVGL_DISPLAY_DEV_NAME);
+
+	if (display_dev == NULL) {
+		printk("Device not found.");
+		return 1;
+	}
+
+    create_styles();
+    create_windows();
+
+    display_blanking_off(display_dev);
+
+    set_styles();
+
+    return 0;
 }
 
 void display_create_appointment(message_appointment* appointment) {
@@ -206,47 +247,32 @@ void display_clear_appointments(void) {
     lv_task_handler();
 }
 
-static void create_windows(void) {
-    create_wallpaper();
-    create_calendar();
-    create_main_window();
-    create_status_window();
-    lv_task_handler();
-}
-
-int display_init(void)
-{
-	display_dev = device_get_binding(CONFIG_LVGL_DISPLAY_DEV_NAME);
-
-	if (display_dev == NULL) {
-		printk("Device not found.");
-		return 1;
-	}
-
-    create_styles();
-    create_windows();
-
-    display_blanking_off(display_dev);
-
-    set_styles();
-
-    return 0;
-}
-
 void display_set_status_message(const char* message) {
-    snprintf(status_message_message, 20, "Status: %s", message);
+    snprintf(status_message_message, 24, "Status: %s", message);
     lv_label_set_text(status_message_label, status_message_message);
     lv_task_handler();
 }
 
 void display_set_status_address(uint16_t address) {
-    snprintf(status_address_message, 20, "Address: 0x%04x", address);
+    snprintf(status_address_message, 24, "Address: 0x%04x", address);
     lv_label_set_text(status_address_label, status_address_message);
     lv_task_handler();
 }
 
 void display_set_status_heartbeat(uint16_t hops) {
-    snprintf(status_heartbeat_message, 20, "Hops: %d", hops);
+    snprintf(status_heartbeat_message, 24, "Hops: %d", hops);
     lv_label_set_text(status_heartbeat_label, status_heartbeat_message);
+    lv_task_handler();
+}
+
+void display_set_date(const char* message) {
+    snprintf(calender_header_message, 24, "%s", message);
+    lv_label_set_text(calendar_header_label, message);
+    lv_task_handler();
+}
+
+void display_set_room(const char* message) {
+    snprintf(main_room_message, 24, "Room: %s", message);
+    lv_label_set_text(main_room_label, main_room_message);
     lv_task_handler();
 }
