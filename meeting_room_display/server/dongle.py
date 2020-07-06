@@ -13,8 +13,8 @@ class Dongle():
     def __init__(self):
         self._queue = Queue()
         self._serial = TTY(self._queue)
-        #self._serial.connect()
-        #self._serial.start()
+        self._serial.connect()
+        self._serial.start()
 
     def disconnect(self):
         self._serial.stop()
@@ -43,4 +43,4 @@ class Dongle():
         payload = struct.pack("ff", start_time, end_time)
         payload += description.encode()
         self.send(address, MessageType.APPOINTMENT, payload)
-        #self.receive()
+        self.receive()

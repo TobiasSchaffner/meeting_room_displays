@@ -15,4 +15,6 @@ try:
             dongle.send_appointment(address, event.start, event.end, event.subject + "\x00")
 
 except KeyboardInterrupt:
+    pass
+finally:
     dongle.disconnect()
