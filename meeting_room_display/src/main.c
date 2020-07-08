@@ -18,6 +18,9 @@
 #include "message.h"
 #include "power.h"
 
+#include <power/power.h>
+
+
 static K_SEM_DEFINE(semaphore, 0, 1);
 
 void on_button_press(uint32_t button)
@@ -84,7 +87,7 @@ void hibernate(int seconds)
 {
 	printk("Going to sleep!\n");
 	mesh_suspend();
-	power_hibernate(seconds);
+	k_sleep(K_SECONDS(seconds));
 	mesh_resume();
 	printk("Resumed!\n");
 }
@@ -94,9 +97,6 @@ void main(void)
 	int err = 0;
 
 	printk("Status: Initializing\n");
-
-	if (!err)
-		err = power_init();
 
 	if (!err)
 		err = serial_init();
@@ -113,6 +113,7 @@ void main(void)
 	if (err) {
 		printk("Status: Error\n");
 		display_set_status_message("Error");
+		k_sem_take(&semaphore, K_FOREVER);
 	}
 	else {
 		printk("Address: 0x%04x\n", MESH_NODE_ADDR);
@@ -121,8 +122,11 @@ void main(void)
 		display_set_status_message("Initialized");
 	}
 
+	if (!err)
+		err = power_init();
+
 	while (1) {
-		hibernate(60);
-		k_sem_take(&semaphore, K_SECONDS(60));
+		hibernate(20);
+		k_sem_take(&semaphore, K_SECONDS(10));
 	}
 }
