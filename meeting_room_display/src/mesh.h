@@ -13,6 +13,8 @@
 #define MESH_GROUP_ADDR 0xc000
 
 int mesh_init(void);
+int mesh_suspend(void);
+int mesh_resume(void);
 
 void mesh_increment_target_address(void);
 void mesh_message_send(uint32_t message_type, uint16_t dst_address, const void* payload, uint16_t len);

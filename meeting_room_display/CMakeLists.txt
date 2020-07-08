@@ -8,6 +8,7 @@ project(mesh_demo)
 
 target_sources(app PRIVATE src/main.c)
 target_sources(app PRIVATE src/mesh.c)
+target_sources(app PRIVATE src/power.c)
 
 if(CONFIG_USB_CDC_ACM)
   message("CONFIG_USB_CDC_ACM")

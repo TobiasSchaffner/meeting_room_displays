@@ -16,7 +16,7 @@ display: build-display flash-display
 build-display:
 	west build -b nrf52840dk_nrf52840 -d display-build -p auto . -- \
 		-DSHIELD=waveshare_epaper_gdew075t7 \
-		-DOVERLAY_CONFIG="display.conf debug.conf" \
+		-DOVERLAY_CONFIG="display.conf" \
 		-DMESH_NODE_ADDR=0x030c
 
 flash-display:

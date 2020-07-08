@@ -249,6 +249,16 @@ static void bt_ready(int err)
 #endif
 }
 
+int mesh_suspend(void)
+{
+	return bt_mesh_suspend();
+}
+
+int mesh_resume(void)
+{
+	return bt_mesh_resume();
+}
+
 int mesh_init(void) {
     int err;
 
