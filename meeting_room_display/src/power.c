@@ -7,6 +7,7 @@
 
 #include "power.h"
 #include "mesh.h"
+#include "display.h"
 
 bool initialized = false;
 
@@ -17,16 +18,6 @@ static void disable_device(const char* name)
 
 	if (rc) {
 		printk("Error disabling device %s peripheral (%d)\n", name, rc);
-	}
-}
-
-static void enable_device(const char* name)
-{
-	struct device *dev = device_get_binding(name);
-	int rc = device_set_power_state(dev, DEVICE_PM_ACTIVE_STATE, NULL, NULL);
-
-	if (rc) {
-		printk("Error enabling device %s peripheral (%d)\n", name, rc);
 	}
 }
 
@@ -46,11 +37,13 @@ bool sys_pm_policy_low_power_devices(enum power_states state) {
 
 void power_suspend(int seconds)
 {
+	display_set_status_message("Suspended");
 	printk("Suspending!\n");
 	mesh_suspend();
 	k_sleep(K_SECONDS(seconds));
 	mesh_resume();
 	printk("Resumed!\n");
+	display_set_status_message("Listening");
 }
 
 int power_init(void) {
