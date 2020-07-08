@@ -42,34 +42,35 @@ void on_button_press(uint32_t button)
 
 void on_mesh_message_received(uint32_t message_type, uint16_t src_address, const void* payload, uint16_t len)
 {
-	switch(message_type) {
-		case MESSAGE_OK:
-			serial_message_send(message_type, src_address, payload, len);
-			break;
-		case MESSAGE_DAY:
-			mesh_message_send(MESSAGE_OK, src_address, NULL, 0);
-			break;
-		case MESSAGE_ROOM:
-			mesh_message_send(MESSAGE_OK, src_address, NULL, 0);
-			break;
-		case MESSAGE_APPOINTMENT:
-			display_create_appointment((message_appointment*) payload);
-			mesh_message_send(MESSAGE_OK, src_address, NULL, 0);
-			break;
-		case MESSAGE_APPOINTMENTS_CLEAR:
-			display_clear_appointments();
-			mesh_message_send(MESSAGE_OK, src_address, NULL, 0);
-			break;
-		case MESSAGE_BUTTON:
-			printk("Received Button Press.\n");
-			mesh_message_send(MESSAGE_OK, src_address, NULL, 0);
-			break;
-		case MESSAGE_STRING:
-			printk("Received String: %s\n", (char*) payload);
-			mesh_message_send(MESSAGE_OK, src_address, NULL, 0);
-			break;
-		default:
-			printk("Message type not supported.\n");
+	if (message_type == MESSAGE_OK)
+		serial_message_send(message_type, src_address, payload, len);
+	else {
+		mesh_message_send(MESSAGE_OK, src_address, NULL, 0);
+		switch(message_type) {
+			case MESSAGE_DAY:
+				display_set_date((char*) payload);
+				break;
+			case MESSAGE_ROOM:
+				display_set_room((char*) payload);
+				break;
+			case MESSAGE_APPOINTMENT:
+				display_create_appointment((message_appointment*) payload);
+				break;
+			case MESSAGE_APPOINTMENTS_CLEAR:
+				display_clear_appointments();
+				break;
+			case MESSAGE_SUSPEND:
+				power_suspend(*((uint32_t*) payload));
+				break;
+			case MESSAGE_BUTTON:
+				printk("Received Button Press.\n");
+				break;
+			case MESSAGE_STRING:
+				printk("Received String: %s\n", (char*) payload);
+				break;
+			default:
+				printk("Message type not supported.\n");
+		}
 	}
 }
 
@@ -81,15 +82,6 @@ void on_mesh_heartbeat(uint16_t hops)
 {
 	printk("Hops: %d\n", hops);
 	display_set_status_heartbeat(hops);
-}
-
-void hibernate(int seconds)
-{
-	printk("Going to sleep!\n");
-	mesh_suspend();
-	k_sleep(K_SECONDS(seconds));
-	mesh_resume();
-	printk("Resumed!\n");
 }
 
 void main(void)
@@ -126,7 +118,6 @@ void main(void)
 		err = power_init();
 
 	while (1) {
-		hibernate(20);
-		k_sem_take(&semaphore, K_SECONDS(10));
+		k_sem_take(&semaphore, K_FOREVER);
 	}
 }

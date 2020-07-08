@@ -6,6 +6,7 @@
 #include <hal/nrf_gpio.h>
 
 #include "power.h"
+#include "mesh.h"
 
 bool initialized = false;
 
@@ -41,6 +42,15 @@ bool sys_pm_policy_low_power_devices(enum power_states state) {
 		}
 	}
 	return false;
+}
+
+void power_suspend(int seconds)
+{
+	printk("Suspending!\n");
+	mesh_suspend();
+	k_sleep(K_SECONDS(seconds));
+	mesh_resume();
+	printk("Resumed!\n");
 }
 
 int power_init(void) {

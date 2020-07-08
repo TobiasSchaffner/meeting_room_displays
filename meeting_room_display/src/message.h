@@ -6,6 +6,7 @@
 #define MESSAGE_ROOM				    0x02
 #define MESSAGE_APPOINTMENT			    0x03
 #define MESSAGE_APPOINTMENTS_CLEAR		0x04
+#define MESSAGE_SUSPEND		            0x05
 
 #define MESSAGE_STRING				    0x0e
 #define MESSAGE_BUTTON				    0x0f
