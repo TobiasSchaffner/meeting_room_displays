@@ -20,7 +20,7 @@ class TTY(Thread):
         self._die = True
 
     def send(self, message: bytes):
-        # print(f"Sending Bytes: {message}")
+        print(f"Sending Bytes: {message}")
         self._ser.write(message)
 
     def connect(self):
@@ -35,7 +35,6 @@ class TTY(Thread):
                 init = buf.find(b'Status: Initializing') != -1
                 newline = buf.find(b'\n')
                 if newline != -1:
-                    # print(buf[:newline+1].decode(), end='')
                     buf = buf[newline+1:]
             sleep(0.1)
 
@@ -70,11 +69,11 @@ class TTY(Thread):
                         print(buf[:start].decode(), end='')
                         buf = buf[start:]
                         marker_found = True
-                if marker_found and len(buf) >= MESSAGE_HEADER_LEN:
-                    _, length, address, method_type = struct.unpack("3sBHH", buf)
+                if marker_found and len(buf) >= MESSAGE_MIN_LEN:
+                    _, length, address, method_type = struct.unpack("3sBHH", buf[:MESSAGE_MIN_LEN])
                     message = Message(length, address, method_type)
                 if message is not None and len(buf) >= message.length:
-                    #print(f"Received Bytes: {buf}")
+                    print(f"Received Bytes: {buf}")
                     message.payload = buf[MESSAGE_MIN_LEN:]
                     self._queue.put(message)
                     message = None

@@ -1,10 +1,11 @@
-#include <sys/printk.h>
 #include <stdio.h>
-
 #include <settings/settings.h>
-
 #include "mesh.h"
 #include "message.h"
+
+#include <logging/log.h>
+
+LOG_MODULE_REGISTER(ble, LOG_LEVEL_INF);
 
 #define MOD_LF 0x0000
 
@@ -55,12 +56,12 @@ static struct bt_mesh_cfg_cli cfg_cli = {
 
 static void attention_on(struct bt_mesh_model *model)
 {
-	printk("Attention on.\n");
+	LOG_INF("Attention on.");
 }
 
 static void attention_off(struct bt_mesh_model *model)
 {
-	printk("Attention off.\n");
+	LOG_INF("Attention off.");
 }
 
 static const struct bt_mesh_health_srv_cb health_srv_cb = {
@@ -83,7 +84,7 @@ static struct bt_mesh_model root_models[] = {
 static void message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf, uint32_t opcode) {
 	// Check if we received our own message
 	if (ctx->addr == bt_mesh_model_elem(model)->addr) {
-		printk("Ignored message as 0x%04x is our own address.\n", bt_mesh_model_elem(model)->addr);
+		LOG_DBG("Ignored message as 0x%04x is our own address.\n", bt_mesh_model_elem(model)->addr);
 		return;
 	}
     on_mesh_message_received(opcode, ctx->addr, buf->data, buf->len);
@@ -149,15 +150,15 @@ void mesh_message_send(uint32_t message_type, uint16_t address, const void* payl
 		net_buf_simple_add_mem(&msg, payload, len);
 
 	if (bt_mesh_model_send(&vnd_models[0], &ctx, &msg, NULL, NULL) == 0) {
-		printk("Sending Mesh Message Type: %d Address: %d!\n", message_type, address);
+		LOG_DBG("Sending Mesh Message Type: %d Address: %d!", message_type, address);
 	} else {
-		printk("Sending Mesh Failed!\n");
+		LOG_ERR("Sending Mesh Failed!");
 	}
 }
 
 static void configure(void)
 {
-	printk("Configuring...\n");
+	LOG_INF("Configuring...\n");
 
 	/* Add Application Key */
 	bt_mesh_cfg_app_key_add(net_idx, mesh_addr, net_idx, app_idx, app_key, NULL);
@@ -186,7 +187,7 @@ static void configure(void)
 		};
 
 		bt_mesh_cfg_hb_pub_set(net_idx, mesh_addr, &pub, NULL);
-		printk("Publishing heartbeat messages\n");
+		LOG_INF("Publishing heartbeat messages");
 	}
 #endif
 	printk("Configuration complete.\n");
@@ -201,22 +202,22 @@ static const struct bt_mesh_prov prov = {
 static void bt_ready(int err)
 {
 	if (err) {
-		printk("Bluetooth init failed. (err %d)\n", err);
+		LOG_ERR("Bluetooth init failed. (err %d)", err);
 		return;
 	}
 
-	printk("Bluetooth initialized.\n");
+	LOG_INF("Bluetooth initialized.");
 
 	err = bt_mesh_init(&prov, &comp);
 	if (err) {
-		printk("Initializing mesh failed. (err %d)\n", err);
+		LOG_ERR("Initializing mesh failed. (err %d)", err);
 		return;
 	}
 
-	printk("Mesh initialized.\n");
+	LOG_INF("Mesh initialized.");
 
 	if (IS_ENABLED(CONFIG_BT_SETTINGS)) {
-		printk("Loading stored settings\n");
+		LOG_INF("Loading stored settings");
 		settings_load();
 	}
 
@@ -224,12 +225,12 @@ static void bt_ready(int err)
 				dev_key);
 
 	if (err == -EALREADY) {
-		printk("Using stored settings.\n");
+		LOG_INF("Using stored settings.");
 	} else if (err) {
-		printk("Provisioning failed. (err %d)\n", err);
+		LOG_ERR("Provisioning failed. (err %d)", err);
 		return;
 	} else {
-		printk("Provisioning completed.\n");
+		LOG_INF("Provisioning completed.");
 		configure();
 	}
 
@@ -247,7 +248,7 @@ static void bt_ready(int err)
 		};
 
 		bt_mesh_cfg_hb_sub_set(net_idx, mesh_addr, &sub, NULL);
-		printk("Subscribing to heartbeat messages.\n");
+		LOG_INF("Subscribing to heartbeat messages.");
 	}
 #endif
 }
@@ -268,7 +269,7 @@ int mesh_init(void) {
     /* Initialize the Bluetooth Subsystem */
 	err = bt_enable(bt_ready);
 	if (err) {
-		printk("Bluetooth init failed (err %d)\n", err);
+		LOG_ERR("Bluetooth init failed (err %d)", err);
 	}
 
 	return err;

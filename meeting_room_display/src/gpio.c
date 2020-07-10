@@ -8,12 +8,14 @@
 
 #include <drivers/gpio.h>
 #include <soc.h>
-#include <sys/printk.h>
 #include <ctype.h>
 #include <bluetooth/mesh.h>
 
 #include "gpio.h"
 
+#include <logging/log.h>
+
+LOG_MODULE_REGISTER(gpio, LOG_LEVEL_INF);
 
 #define FLAGS_OR_ZERO(node)						\
 	COND_CODE_1(DT_PHA_HAS_CELL(node, gpios, flags),		\
@@ -69,7 +71,7 @@ static void button_pressed(struct device *dev, struct gpio_callback *cb,
 	else if (pins & BIT(SW3_GPIO_PIN)) {
 		k_work_submit(&button_4_work);}
 	else {
-		printk("Unexpected button press.\n");}
+		LOG_ERR("Unexpected button press.\n");}
 }
 
 static void configure_buttons(void)

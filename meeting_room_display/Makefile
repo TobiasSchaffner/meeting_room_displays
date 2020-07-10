@@ -1,15 +1,13 @@
 all: build-all flash-all
 
-build-all: build-display build-node build-sender build-dongle
+build-all: build-display build-relay build-dongle
 
-flash-all: flash-display flash-node flash-sender
+flash-all: flash-display flash-relay flash-dongle
 
 clean-all:
 	rm -rf display-build
-	rm -rf node-build
-	rm -rf sender-build
+	rm -rf relay-build
 	rm -rf dongle-build
-	rm -rf build
 
 display: build-display flash-display
 
@@ -23,27 +21,16 @@ flash-display:
 	@echo ">>>>>>>>DISPLAY<<<<<<<<"
 	west flash -d display-build
 
-node: build-node flash-node
+relay: build-relay flash-relay
 
-build-node:
+build-relay:
 	west build -b nrf52840dk_nrf52840 -d node-build -p auto . -- \
 		-DOVERLAY_CONFIG="debug.conf" \
 		-DMESH_NODE_ADDR=0x030d
 
-flash-node:
+flash-relay:
 	@echo ">>>>>>>>NODE<<<<<<<<"
 	west flash -d node-build
-
-sender: build-sender flash-sender
-
-build-sender:
-	@echo ">>>>>>>>SENDER<<<<<<<<"
-	west build -b nrf52840_pca10056 -d sender-build -p auto . -- \
-		-DOVERLAY_CONFIG="debug.conf" \
-		-DMESH_NODE_ADDR=0x000f
-
-flash-sender:
-	west flash -d sender-build
 
 dongle: build-dongle flash-dongle
 

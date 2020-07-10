@@ -6,10 +6,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 #include <kernel.h>
-#include <sys/printk.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <logging/log.h>
 
 #include "mesh.h"
 #include "gpio.h"
@@ -18,8 +18,7 @@
 #include "message.h"
 #include "power.h"
 
-#include <power/power.h>
-
+LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
 static K_SEM_DEFINE(semaphore, 0, 1);
 
@@ -36,7 +35,7 @@ void on_button_press(uint32_t button)
 			mesh_message_send(MESSAGE_APPOINTMENTS_CLEAR, MESH_GROUP_ADDR, NULL, 0);
 			break;
 		default:
-			printk("Button not supported.\n");
+			LOG_ERR("Button not supported.");
 	}
 }
 
@@ -60,16 +59,16 @@ void on_mesh_message_received(uint32_t message_type, uint16_t src_address, const
 				display_clear_appointments();
 				break;
 			case MESSAGE_SUSPEND:
-				power_suspend(*((uint32_t*) payload));
+				power_suspend(*((int*) payload));
 				break;
 			case MESSAGE_BUTTON:
-				printk("Received Button Press.\n");
+				LOG_INF("Received Button Press.");
 				break;
 			case MESSAGE_STRING:
-				printk("Received String: %s\n", (char*) payload);
+				LOG_INF("Received String: %s", (char*) payload);
 				break;
 			default:
-				printk("Message type not supported.\n");
+				LOG_ERR("Message type not supported.");
 		}
 	}
 }
@@ -80,15 +79,29 @@ void on_serial_message_received(uint32_t message_type, uint16_t dst_address, con
 
 void on_mesh_heartbeat(uint16_t hops)
 {
-	printk("Hops: %d\n", hops);
+	LOG_INF("Hops: %d\n", hops);
 	display_set_status_heartbeat(hops);
+}
+
+void on_power_suspend(void)
+{
+	LOG_INF("Suspending...");
+	display_set_status_message("Suspended");
+	mesh_suspend();
+}
+
+void on_power_resume(void)
+{
+	mesh_resume();
+	display_set_status_message("Listening");
+	LOG_INF("Resumed");
 }
 
 void main(void)
 {
 	int err = 0;
 
-	printk("Status: Initializing\n");
+	LOG_INF("Status: Initializing\n");
 
 	if (!err)
 		err = serial_init();
@@ -103,14 +116,14 @@ void main(void)
 		err = mesh_init();
 
 	if (err) {
-		printk("Status: Error\n");
+		LOG_ERR("Status: Error\n");
 		display_set_status_message("Error");
 		k_sem_take(&semaphore, K_FOREVER);
 	}
 	else {
-		printk("Address: 0x%04x\n", MESH_NODE_ADDR);
+		LOG_INF("Address: 0x%04x", MESH_NODE_ADDR);
 		display_set_status_address(MESH_NODE_ADDR);
-		printk("Status: Initialized\n");
+		LOG_INF("Status: Initialized");
 		display_set_status_message("Initialized");
 	}
 

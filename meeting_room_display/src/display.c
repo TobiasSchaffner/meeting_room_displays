@@ -119,7 +119,7 @@ static void create_main_window() {
     lv_obj_align(main_window, NULL, LV_ALIGN_IN_TOP_RIGHT, -20, 20);
 
     main_room_label = lv_label_create(main_window, NULL);
-    lv_label_set_text(main_room_label, "Room: 1.105");
+    lv_label_set_text(main_room_label, "Room: 0.000");
     lv_obj_align(main_room_label, NULL, LV_ALIGN_IN_TOP_LEFT, 20, 20);
 
     LV_IMG_DECLARE(mixedmode);
@@ -159,7 +159,7 @@ static void create_calendar(void) {
     lv_obj_align(calendar_header, NULL, LV_ALIGN_IN_TOP_LEFT, 2, 2);
 
 	calendar_header_label = lv_label_create(calendar_header, NULL);
-    lv_label_set_text(calendar_header_label, "Montag, 01.01.20");
+    lv_label_set_text(calendar_header_label, "Mo, 01.01.01");
     lv_obj_align(calendar_header_label, NULL, LV_ALIGN_CENTER, 0, 0);
 
 

@@ -31,7 +31,7 @@ typedef struct serial_message
 } serial_message;
 
 static void serial_message_received(uint32_t message_type, uint16_t dst_address, const void* payload, uint16_t len) {
-	printk("Received Serial Message Type %d: Address: %d Len: %d\n", message_type, dst_address, len);
+	LOG_DBG("Received Serial Message Type %d: Address: %d Len: %d\n", message_type, dst_address, len);
 	on_serial_message_received(message_type, dst_address, payload, len);
 }
 
@@ -45,12 +45,12 @@ static void interrupt_handler(struct device *dev)
 			bytes_read += uart_fifo_read(dev, &buffer[bytes_read], BUF_SIZE - bytes_read);
 			begin = strstr(buffer, MESSAGE_SERIAL_BEGIN);
 
-			printk("Recieved\n");
+			LOG_DBG("Recieved\n");
 			if (begin == NULL) bytes_read = 0;
 			else {
 				int offset = begin - buffer;
 
-				printk("Marker\n");
+				LOG_DBG("Marker\n");
 				if (bytes_read - offset >= MESSAGE_MIN_LEN) {
 					serial_message* message = (serial_message*) begin;
 
@@ -83,6 +83,7 @@ void serial_message_send(uint32_t message_type, uint16_t address, const void* pa
 	memcpy(&buf[sizeof(serial_message)], payload, len);
 
 	k_str_out(buf, buf_size);
+	printk("\n");
 }
 
 int serial_init(void)
@@ -90,7 +91,7 @@ int serial_init(void)
 	uint32_t dtr = 0U;
 	int ret;
 
-	printk("Enabling USB");
+	LOG_INF("Enabling USB");
 
 	k_sleep(K_MSEC(2000));
 
