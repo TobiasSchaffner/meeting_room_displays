@@ -21,15 +21,17 @@ class Dongle():
         self._serial.join()
 
     def send(self, address: int, message_type: MessageType, payload: bytes=b''):
-        print(f"Sending: Address {address} Type: {message_type} Payload: {payload}")
+        #print(f"Sending: Address {address} Type: {message_type} Payload: {payload}")
         message = struct.pack("3sBHH", MESSAGE_SERIAL_BEGIN, MESSAGE_HEADER_LEN + len(payload), address, message_type.value)
         if payload:
             if len(payload) > 255 - 7:
                 raise ValueError(f"Payload must be smaller than {256 - 7} bytes.")
             message += payload
         self._serial.send(message)
+        print("waiting for message")
+        print(self._receive())
 
-    def receive(self):
+    def _receive(self):
         while(True):
             try:
                 return self._queue.get_nowait()
@@ -41,6 +43,6 @@ class Dongle():
         start_time = float(start.hour) + start.minute / 60
         end_time = float(end.hour) + end.minute / 60
         payload = struct.pack("ff", start_time, end_time)
-        payload += description.encode()
+        payload += description.encode() + b"\x00"
         self.send(address, MessageType.APPOINTMENT, payload)
-        self.receive()
+        self._receive()
