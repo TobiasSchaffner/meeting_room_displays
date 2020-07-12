@@ -11,7 +11,7 @@
 
 #include <logging/log.h>
 
-LOG_MODULE_REGISTER(power, LOG_LEVEL_INF);
+LOG_MODULE_REGISTER(power_module, LOG_LEVEL_INF);
 
 bool initialized = false;
 
