@@ -1,31 +1,20 @@
-import cal
-import dongle
-import datetime
-import locale
-import time
+from o365_calendar import Calendar
+from dongle import Dongle
+from display_cluster import DisplayCluster
 
-import config
-from message import MessageType
-
-locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')
-calendar = cal.Calendar()
-dongle = dongle.Dongle()
+calendar = Calendar()
+dongle = Dongle()
 
 try:
-    while True:
-        date = datetime.datetime.now()
-        date_string = date.strftime("%a, %d.%m.%y")
+    displays = DisplayCluster(dongle)
 
-        for address, room in config.displays.items():
-            print(f"Room {room}, Address: {address}")
-            dongle.send(address, MessageType.DATE, date_string.encode("ASCII")  + b"\x00")
-            dongle.send(address, MessageType.ROOM, room.encode("ASCII") + b"\x00")
-            for event in calendar.get_events(room):
-                print(event)
-                dongle.send_appointment(address, event.start, event.end, event.subject)
-        dongle.send(config.group_addr, MessageType.SUSPEND, int(config.interval * 60).to_bytes(4, "little"))
-        print(f"Going to sleep for {config.interval * 60 + 5} seconds...")
-        time.sleep(config.interval * 60 + 5)
+    while True:
+        displays.set_date()
+
+        for room in displays.rooms():
+            displays[room].set_events(calendar.get_events(room))
+        
+        displays.suspend()
 
 except KeyboardInterrupt:
     pass

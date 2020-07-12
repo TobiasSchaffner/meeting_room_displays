@@ -3,10 +3,17 @@
 # Office 365 credentials
 credentials = ('my_client_id', 'my_client_secret')
 
+# update interval in minutes
+interval = 0.5
+
+# The group address the DisplayCluster is listening to
+group_addr = 0xc000
+
 # Displays address to room name mapping
 displays = {
     0x030c: '0.001',
     0x030d: '0.002'
 }
 
-dongle_port = '/dev/ttyACM0'
+# The tty of the usb dongle
+dongle_port = '/dev/ttyDisplayDongle'

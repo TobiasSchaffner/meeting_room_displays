@@ -33,4 +33,4 @@ class Calendar():
         calendar = self._schedule.get_calendar(calendar_name=room)
         q = calendar.new_query('start').greater_equal(start_time)
         q.chain('and').on_attribute('end').less_equal(end_time)
-        return calendar.get_events(query=q, include_recurring=True)
+        return list(calendar.get_events(query=q, include_recurring=True))
