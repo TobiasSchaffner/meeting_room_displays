@@ -88,22 +88,18 @@ void serial_message_send(uint32_t message_type, uint16_t address, const void* pa
 
 int serial_init(void)
 {
-	uint32_t dtr = 0U;
+	u32_t baudrate, dtr = 0U;
 	int ret;
-
-	LOG_INF("Enabling USB");
-
-	k_sleep(K_MSEC(2000));
-
-	ret = usb_enable(NULL);
-	if (ret != 0) {
-		LOG_ERR("Failed to enable USB");
-		return 2;
-	}
 
 	dev = device_get_binding("CDC_ACM_0");
 	if (!dev) {
 		LOG_ERR("CDC ACM device not found");
+		return 1;
+	}
+
+	ret = usb_enable(NULL);
+	if (ret != 0) {
+		LOG_ERR("Failed to enable USB");
 		return 1;
 	}
 
@@ -114,14 +110,38 @@ int serial_init(void)
 		if (dtr) {
 			break;
 		} else {
+			/* Give CPU resources to low priority threads. */
 			k_sleep(K_MSEC(100));
 		}
 	}
 
 	LOG_INF("DTR set");
 
+	/* They are optional, we use them to test the interrupt endpoint */
+	ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DCD, 1);
+	if (ret) {
+		LOG_WRN("Failed to set DCD, ret code %d", ret);
+	}
+
+	ret = uart_line_ctrl_set(dev, UART_LINE_CTRL_DSR, 1);
+	if (ret) {
+		LOG_WRN("Failed to set DSR, ret code %d", ret);
+	}
+
+	/* Wait 1 sec for the host to do all settings */
+	k_busy_wait(1000000);
+
+	ret = uart_line_ctrl_get(dev, UART_LINE_CTRL_BAUD_RATE, &baudrate);
+	if (ret) {
+		LOG_WRN("Failed to get baudrate, ret code %d", ret);
+	} else {
+		LOG_INF("Baudrate detected: %d", baudrate);
+	}
+
 	uart_irq_callback_set(dev, interrupt_handler);
+
+	/* Enable rx interrupts */
 	uart_irq_rx_enable(dev);
 
-	return 0;
+	return ret;
 }

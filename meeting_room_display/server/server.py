@@ -8,11 +8,10 @@ import config
 from message import MessageType
 
 locale.setlocale(locale.LC_TIME, 'de_DE.UTF-8')
-
 calendar = cal.Calendar()
+dongle = dongle.Dongle()
 
 try:
-    dongle = dongle.Dongle()
     while True:
         date = datetime.datetime.now()
         date_string = date.strftime("%a, %d.%m.%y")

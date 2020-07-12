@@ -10,8 +10,15 @@ import config
 
 class TTY(Thread):
 
+    _ser = None
+
     def __init__(self, message_queue):
-        self._ser = serial.Serial(config.dongle_port, 115200)
+        print("Waiting for USB Dongle...")
+        while not self._ser:
+            try:
+                self._ser = serial.Serial(config.dongle_port, 115200)
+            except:
+                sleep(0.01)
         Thread.__init__(self)
         self._queue = message_queue
         self._die = False
@@ -24,32 +31,12 @@ class TTY(Thread):
         self._ser.write(message)
 
     def connect(self):
-        buf = b''
         start = time()
-        init = False
-
-        # Init
-        while time() < start + 3:
+        print("Initializing")
+        while time() < start + 15:
             if (self._ser.inWaiting() > 0):
-                buf += self._ser.read_all()
-                init = buf.find(b'Status: Initializing') != -1
-                newline = buf.find(b'\n')
-                if newline != -1:
-                    buf = buf[newline+1:]
+                print(self._ser.read_all().decode(), sep="")
             sleep(0.1)
-
-        if init:
-            while True:
-                if (self._ser.inWaiting() > 0):
-                    buf += self._ser.read_all()
-                    if (buf.find(b'Configuration complete.') != -1):
-                        print(buf.decode(), end='')
-                        break
-                    newline = buf.find(b'\n')
-                    if newline != -1:
-                        print(buf[:newline+1].decode(), end='')
-                        buf = buf[newline+1:]
-                sleep(0.1)
 
     def run(self):
         buf = b''

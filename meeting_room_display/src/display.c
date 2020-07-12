@@ -21,6 +21,8 @@
 #define WINDOW_WIDTH    ((SCREEN_WIDTH - (3 * PADDING)) / 2)
 #define WINDOW_HEIGHT   (SCREEN_HEIGTH - (2 * PADDING))
 
+#define APPOINTMENT_SLOTS  10
+
 static struct device *display_dev;
 
 // Wallpaper
@@ -69,8 +71,8 @@ static lv_point_t line_points[] = {{0, 0}, {305, 0}};
 // Appointments
 static lv_style_t style_appointment;
 static int appointments;
-static lv_obj_t* calendar_appointment_slots[10];
-static lv_obj_t* calendar_appointment_labels[10];
+static lv_obj_t* calendar_appointment_slots[APPOINTMENT_SLOTS];
+static lv_obj_t* calendar_appointment_labels[APPOINTMENT_SLOTS];
 
 static void create_styles(void) {
     lv_style_copy(&style_window, &lv_style_plain);
@@ -211,7 +213,8 @@ int display_init(void)
 }
 
 void display_create_appointment(message_appointment* appointment) {
-    if (appointment->start >= appointment->end ||
+    if (appointment >= APPOINTMENT_SLOTS ||
+        appointment->start >= appointment->end ||
         appointment->start < 8 ||
         appointment->end > 18)
             return;
