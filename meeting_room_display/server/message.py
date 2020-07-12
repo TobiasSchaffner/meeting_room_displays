@@ -11,8 +11,9 @@ class MessageType(Enum):
     DATE = 0x01
     ROOM = 0x02
     APPOINTMENT = 0x03
-    APPOINTMENTS_CLEAR = 0x04
-    SUSPEND = 0x05
+    APPOINTMENT_CLEAR = 0x04
+    APPOINTMENTS_CLEAR = 0x05
+    SUSPEND = 0x06
 
     STRING = 0x0e
     BUTTON = 0x0f

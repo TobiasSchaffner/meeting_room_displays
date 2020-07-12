@@ -38,10 +38,10 @@ class Dongle():
     def _receive(self, timeout):
         return self._queue.get(timeout=timeout)
 
-    def send_appointment(self, address: int, start: datetime, end: datetime, description: str):
+    def send_appointment(self, address: int, slot: int, start: datetime, end: datetime, description: str):
         start_time = float(start.hour) + start.minute / 60
         end_time = float(end.hour) + end.minute / 60
-        payload = struct.pack("ff", start_time, end_time)
+        payload = struct.pack("iff", slot, start_time, end_time)
         payload += description.encode() + b"\x00"
         self.send(address, MessageType.APPOINTMENT, payload)
         sleep(10)

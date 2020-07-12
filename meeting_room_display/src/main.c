@@ -55,6 +55,9 @@ void on_mesh_message_received(uint32_t message_type, uint16_t src_address, const
 			case MESSAGE_APPOINTMENT:
 				display_create_appointment((message_appointment*) payload);
 				break;
+			case MESSAGE_APPOINTMENT_CLEAR:
+				display_clear_appointment(*((int*) payload));
+				break;
 			case MESSAGE_APPOINTMENTS_CLEAR:
 				display_clear_appointments();
 				break;

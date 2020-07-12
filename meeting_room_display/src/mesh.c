@@ -98,6 +98,8 @@ static void room_message_received(struct bt_mesh_model *model, struct bt_mesh_ms
 	message_received(model, ctx, buf, MESSAGE_ROOM);}
 static void appointment_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
 	message_received(model, ctx, buf, MESSAGE_APPOINTMENT);}
+static void clear_appointment_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
+	message_received(model, ctx, buf, MESSAGE_APPOINTMENT_CLEAR);}
 static void clear_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
 	message_received(model, ctx, buf, MESSAGE_APPOINTMENTS_CLEAR);}
 static void suspend_message_received(struct bt_mesh_model *model, struct bt_mesh_msg_ctx *ctx, struct net_buf_simple *buf) {
@@ -112,6 +114,7 @@ static const struct bt_mesh_model_op vnd_ops[] = {
 	{ MESH_MESSAGE_TYPE(MESSAGE_DAY), 0, day_message_received },
 	{ MESH_MESSAGE_TYPE(MESSAGE_ROOM), 0, room_message_received },
 	{ MESH_MESSAGE_TYPE(MESSAGE_APPOINTMENT), 0, appointment_message_received },
+	{ MESH_MESSAGE_TYPE(MESSAGE_APPOINTMENT_CLEAR), 0, clear_appointment_message_received },
 	{ MESH_MESSAGE_TYPE(MESSAGE_APPOINTMENTS_CLEAR), 0, clear_message_received },
 	{ MESH_MESSAGE_TYPE(MESSAGE_SUSPEND), 0, suspend_message_received },
 

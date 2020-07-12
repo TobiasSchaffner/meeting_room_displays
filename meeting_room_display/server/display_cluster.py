@@ -17,6 +17,7 @@ class DisplayCluster(dict):
         for address, room in config.displays.items():
             self[room] = Display(dongle, address)
             self[room].set_room(room)
+            self[room].clear_events()
 
     def rooms(self):
         return self.keys()

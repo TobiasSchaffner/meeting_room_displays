@@ -70,7 +70,6 @@ static lv_point_t line_points[] = {{0, 0}, {305, 0}};
 
 // Appointments
 static lv_style_t style_appointment;
-static int appointments;
 static lv_obj_t* calendar_appointment_slots[APPOINTMENT_SLOTS];
 static lv_obj_t* calendar_appointment_labels[APPOINTMENT_SLOTS];
 
@@ -213,15 +212,15 @@ int display_init(void)
 }
 
 void display_create_appointment(message_appointment* appointment) {
-    if (appointment >= APPOINTMENT_SLOTS ||
+    if (appointment->slot >= APPOINTMENT_SLOTS ||
         appointment->start >= appointment->end ||
         appointment->start < 8 ||
         appointment->end > 18)
             return;
 
-    printk("Adding Apointment %s\n", appointment->description);
+    int slot = appointment->slot;
 
-    int slot = appointments;
+    printk("Adding Apointment %s to slot %d\n", appointment->description, slot);
 
     int halign = 60;
     int valign = 4 + 35 + (40 * (appointment->start - 8));
@@ -237,16 +236,25 @@ void display_create_appointment(message_appointment* appointment) {
     lv_label_set_text(calendar_appointment_labels[slot], appointment->description);
     lv_obj_align(calendar_appointment_labels[slot], NULL, LV_ALIGN_CENTER, 0, 0);
 
-    appointments++;
     lv_task_handler();
 }
 
-void display_clear_appointments(void) {
-    for (int slot = 0; slot < appointments; slot++) {
+static void clear_appointment(int slot) {
+    if (calendar_appointment_slots[slot] != NULL) {
         lv_obj_del(calendar_appointment_labels[slot]);
         lv_obj_del(calendar_appointment_slots[slot]);
+        calendar_appointment_slots[slot] = NULL;
     }
-    appointments = 0;
+}
+
+void display_clear_appointments(void) {
+    for (int slot = 0; slot < APPOINTMENT_SLOTS; slot++)
+        clear_appointment(slot);
+    lv_task_handler();
+}
+
+void display_clear_appointment(int slot) {
+    clear_appointment(slot);
     lv_task_handler();
 }
 
