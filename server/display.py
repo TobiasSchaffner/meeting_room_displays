@@ -5,7 +5,7 @@ class Display:
     _date = "Mo, 01.01.01"
     _room = "0.000"
 
-    _events = [None] * 10
+    _events = [None] * 16
 
     def __init__(self, dongle, address):
         self._dongle = dongle
@@ -13,7 +13,7 @@ class Display:
 
     def set_room(self, room: str):
         if self._room != room:
-            print(f"Setting room {room} on {self._room}")
+            print(f"Setting room {room} on {self._address}")
             self._dongle.send(self._address, MessageType.ROOM, room.encode("ASCII") + b"\x00")
             self._room = room
 
