@@ -1,1 +1,7 @@
-build/
+app/display-build/
+app/node-build/
+app/sender-build/
+app/dongle-build/
+server/__pycache__/
+server/config.py
+server/o365_token.txt
