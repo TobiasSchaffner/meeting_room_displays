@@ -44,7 +44,6 @@ void on_mesh_message_received(uint32_t message_type, uint16_t src_address, const
 	if (message_type == MESSAGE_OK)
 		serial_message_send(message_type, src_address, payload, len);
 	else {
-		mesh_message_send(MESSAGE_OK, src_address, NULL, 0);
 		switch(message_type) {
 			case MESSAGE_DAY:
 				display_set_date((char*) payload);
@@ -72,7 +71,9 @@ void on_mesh_message_received(uint32_t message_type, uint16_t src_address, const
 				break;
 			default:
 				LOG_ERR("Message type not supported.");
+				return;
 		}
+		mesh_message_send(MESSAGE_OK, src_address, NULL, 0);
 	}
 }
 
@@ -89,14 +90,14 @@ void on_mesh_heartbeat(uint16_t hops)
 void on_power_suspend(void)
 {
 	LOG_INF("Suspending...");
-	display_set_status_message("Suspended");
 	mesh_suspend();
+	display_set_status_message("Suspended");
 }
 
 void on_power_resume(void)
 {
-	mesh_resume();
 	display_set_status_message("Listening");
+	mesh_resume();
 	LOG_INF("Resumed");
 }
 

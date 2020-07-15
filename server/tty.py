@@ -4,6 +4,7 @@ from threading import Thread
 from queue import Queue
 from time import sleep, time
 
+DEBUG = False
 
 from message import MESSAGE_SERIAL_BEGIN, MESSAGE_HEADER_LEN, MESSAGE_MIN_LEN, Message
 import config
@@ -27,7 +28,8 @@ class TTY(Thread):
         self._die = True
 
     def send(self, message: bytes):
-        print(f"Sending Bytes: {message}")
+        if DEBUG:
+            print(f"Sending Bytes: {message}")
         self._ser.write(message)
 
     def connect(self):
@@ -60,7 +62,8 @@ class TTY(Thread):
                     _, length, address, method_type = struct.unpack("3sBHH", buf[:MESSAGE_MIN_LEN])
                     message = Message(length, address, method_type)
                 if message is not None and len(buf) >= message.length:
-                    print(f"Received Bytes: {buf}")
+                    if DEBUG:
+                        print(f"Received Bytes: {buf}")
                     message.payload = buf[MESSAGE_MIN_LEN:]
                     self._queue.put(message)
                     message = None

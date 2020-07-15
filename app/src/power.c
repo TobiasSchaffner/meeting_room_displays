@@ -13,7 +13,7 @@
 
 LOG_MODULE_REGISTER(power_module, LOG_LEVEL_INF);
 
-bool initialized = false;
+static bool in_suspend = false;
 
 static void disable_device(const char* name)
 {
@@ -26,7 +26,7 @@ static void disable_device(const char* name)
 }
 
 bool sys_pm_policy_low_power_devices(enum power_states state) {
-	if (initialized) {
+	if (in_suspend) {
 		switch (state) {
 		case SYS_POWER_STATE_SLEEP_1:
 			LOG_INF("Disabling devices\n");
@@ -39,14 +39,20 @@ bool sys_pm_policy_low_power_devices(enum power_states state) {
 	return false;
 }
 
+static void suspend(k_timeout_t time) {
+	in_suspend = true;
+	k_sleep(time);
+	in_suspend = false;
+}
+
 void power_suspend(int seconds)
-{
+{	s64_t start_time = k_uptime_get();
+
 	on_power_suspend();
-	k_sleep(K_SECONDS(seconds));
+	suspend(K_MSEC(seconds * 1000 - k_uptime_delta(&start_time)));
 	on_power_resume();
 }
 
 int power_init(void) {
-	initialized = true;
 	return 0;
 }

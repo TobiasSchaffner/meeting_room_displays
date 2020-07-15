@@ -20,20 +20,20 @@ class Dongle():
         self._serial.stop()
         self._serial.join()
 
-    def send(self, address: int, message_type: MessageType, payload: bytes=b''):
+    def send(self, address: int, message_type: MessageType, payload: bytes=b'', ack_timeout=1.0, retries=0):
+        if retries > 0:
+            print("retry")
         message = struct.pack("3sBHH", MESSAGE_SERIAL_BEGIN, MESSAGE_HEADER_LEN + len(payload), address, message_type.value)
         if payload:
             if len(payload) > 255 - 7:
                 raise ValueError(f"Payload must be smaller than {256 - 7} bytes.")
             message += payload
         self._serial.send(message)
-        if address != config.group_addr:
-            print("Waiting for message...")
-            try:
-                self._receive(10.0)
-            except Empty:
-                self.send(address, message_type, payload)
-        sleep(6)
+
+        try:
+            self._receive(ack_timeout)
+        except Empty:
+            self.send(address, message_type, payload, ack_timeout, retries + 1)
 
     def _receive(self, timeout):
         return self._queue.get(timeout=timeout)
@@ -44,4 +44,3 @@ class Dongle():
         payload = struct.pack("iff", slot, start_time, end_time)
         payload += description.encode() + b"\x00"
         self.send(address, MessageType.APPOINTMENT, payload)
-        sleep(10)

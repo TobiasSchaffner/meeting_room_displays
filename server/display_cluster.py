@@ -29,6 +29,6 @@ class DisplayCluster(dict):
             self[room].set_date(date_string)
 
     def suspend(self):
-        self._dongle.send(config.group_addr, MessageType.SUSPEND, int(config.interval * 60).to_bytes(4, "little"))
-        print(f"Going to sleep for {config.interval * 60 + 2} seconds...")
-        time.sleep(config.interval * 60 + 2)
+        print(f"Sending displays to sleep for {config.interval * 60} seconds...")
+        self._dongle.send(config.group_addr, MessageType.SUSPEND, int(config.interval * 60).to_bytes(4, "little"), ack_timeout=None)
+        time.sleep(0.1)

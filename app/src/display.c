@@ -73,6 +73,8 @@ static lv_style_t style_appointment;
 static lv_obj_t* calendar_appointment_slots[APPOINTMENT_SLOTS];
 static lv_obj_t* calendar_appointment_labels[APPOINTMENT_SLOTS];
 
+static bool hops_unset = true;
+
 static void create_styles(void) {
     lv_style_copy(&style_window, &lv_style_plain);
     style_window.body.border.width = 3;
@@ -111,7 +113,6 @@ static void create_wallpaper(void) {
     wallpaper = lv_img_create(lv_scr_act(), NULL);
     lv_img_set_src(wallpaper, &chess);
     lv_obj_set_size(wallpaper, 800, 480);
-    lv_task_handler();
 }
 
 static void create_main_window() {
@@ -235,8 +236,6 @@ void display_create_appointment(message_appointment* appointment) {
 	calendar_appointment_labels[slot] = lv_label_create(calendar_appointment_slots[slot], NULL);
     lv_label_set_text(calendar_appointment_labels[slot], appointment->description);
     lv_obj_align(calendar_appointment_labels[slot], NULL, LV_ALIGN_CENTER, 0, 0);
-
-    lv_task_handler();
 }
 
 static void clear_appointment(int slot) {
@@ -250,12 +249,10 @@ static void clear_appointment(int slot) {
 void display_clear_appointments(void) {
     for (int slot = 0; slot < APPOINTMENT_SLOTS; slot++)
         clear_appointment(slot);
-    lv_task_handler();
 }
 
 void display_clear_appointment(int slot) {
     clear_appointment(slot);
-    lv_task_handler();
 }
 
 void display_set_status_message(const char* message) {
@@ -267,23 +264,23 @@ void display_set_status_message(const char* message) {
 void display_set_status_address(uint16_t address) {
     snprintf(status_address_message, 24, "Address: 0x%04x", address);
     lv_label_set_text(status_address_label, status_address_message);
-    lv_task_handler();
 }
 
 void display_set_status_heartbeat(uint16_t hops) {
-    snprintf(status_heartbeat_message, 24, "Hops: %d", hops);
-    lv_label_set_text(status_heartbeat_label, status_heartbeat_message);
-    lv_task_handler();
+    if (hops_unset) {
+        snprintf(status_heartbeat_message, 24, "Hops: %d", hops);
+        lv_label_set_text(status_heartbeat_label, status_heartbeat_message);
+        lv_task_handler();
+        hops_unset = false;
+    }
 }
 
 void display_set_date(const char* message) {
     snprintf(calender_header_message, 24, "%s", message);
     lv_label_set_text(calendar_header_label, message);
-    lv_task_handler();
 }
 
 void display_set_room(const char* message) {
     snprintf(main_room_message, 24, "Room: %s", message);
     lv_label_set_text(main_room_label, main_room_message);
-    lv_task_handler();
 }
