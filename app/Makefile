@@ -1,3 +1,5 @@
+DISPLAY_ADDRESS=0x030c
+
 all: build-all flash-all
 
 build-all: build-display build-relay build-dongle
@@ -15,7 +17,7 @@ build-display:
 	west build -b nrf52840dk_nrf52840 -d display-build -p auto . -- \
 		-DSHIELD=waveshare_epaper_gdew075t7 \
 		-DOVERLAY_CONFIG="display.conf" \
-		-DMESH_NODE_ADDR=0x030c
+		-DMESH_NODE_ADDR=${DISPLAY_ADDRESS}
 
 flash-display:
 	@echo ">>>>>>>>DISPLAY<<<<<<<<"
