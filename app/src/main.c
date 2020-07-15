@@ -134,7 +134,5 @@ void main(void)
 	if (!err)
 		err = power_init();
 
-	while (1) {
-		k_sem_take(&semaphore, K_FOREVER);
-	}
+	k_sem_take(&semaphore, K_FOREVER);
 }
