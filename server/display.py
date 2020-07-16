@@ -1,11 +1,13 @@
 from message import MessageType
 
+NUMBER_OF_SLOTS = 16
+
 class Display:
 
     _date = "Mo, 01.01.01"
     _room = "0.000"
 
-    _events = [None] * 16
+    _events = [None] * NUMBER_OF_SLOTS
 
     def __init__(self, dongle, address):
         self._dongle = dongle
@@ -29,6 +31,12 @@ class Display:
                 return index
         raise IndexError("Out of slots")
 
+    def _get_slot(self, event):
+        for index in range(NUMBER_OF_SLOTS):
+            if self._events[index] is not None and self._events[index] == event:
+                return index
+        return None
+
     def clear_events(self):
         print(f"Clearing events on {self._room}")
         self._dongle.send(self._address, MessageType.APPOINTMENTS_CLEAR)
@@ -37,12 +45,13 @@ class Display:
     def set_events(self, events):
         for event in events:
             if event in [x for x in self._events if x is not None]:
-                slot = self._events.index(event)
+                slot = self._get_slot(event)
                 saved_event = self._events[slot]
                 if event.start != saved_event.start or event.end != saved_event.end or event.subject != saved_event.subject:
                     print(f"Updating event {event.subject} on {self._room}")
                     self._dongle.send(self._address, MessageType.APPOINTMENT_CLEAR, (slot).to_bytes(4, "little"))
                     self._dongle.send_appointment(self._address, slot, event.start, event.end, event.subject)
+                    self._events[slot] = event
             else:
                 slot = self._free_slot()
                 print(f"Adding event {event.subject} on {self._room}")
@@ -50,7 +59,7 @@ class Display:
                 self._events[slot] = event
         for event in self._events:
             if event is not None and event not in events:
-                slot = self._events.index(event)
+                slot = self._get_slot(event)
                 print(f"Removing event {event.subject} on {self._room}")
                 self._dongle.send(self._address, MessageType.APPOINTMENT_CLEAR, (slot).to_bytes(4, "little"))
                 self._events[slot] = None

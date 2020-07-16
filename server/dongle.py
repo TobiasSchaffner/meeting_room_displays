@@ -21,8 +21,6 @@ class Dongle():
         self._serial.join()
 
     def send(self, address: int, message_type: MessageType, payload: bytes=b'', ack_timeout=1.0, retries=0):
-        if retries > 0:
-            print("retry")
         message = struct.pack("3sBHH", MESSAGE_SERIAL_BEGIN, MESSAGE_HEADER_LEN + len(payload), address, message_type.value)
         if payload:
             if len(payload) > 255 - 7:

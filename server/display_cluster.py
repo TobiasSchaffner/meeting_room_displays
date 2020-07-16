@@ -14,6 +14,7 @@ class DisplayCluster(dict):
     def __init__(self, dongle):
         super().__init__()
         self._dongle = dongle
+        self._dongle.send(config.group_addr, MessageType.SYNC)
         for address, room in config.displays.items():
             self[room] = Display(dongle, address)
             self[room].set_room(room)
@@ -32,3 +33,4 @@ class DisplayCluster(dict):
         print(f"Sending displays to sleep for {config.interval * 60} seconds...")
         self._dongle.send(config.group_addr, MessageType.SUSPEND, int(config.interval * 60).to_bytes(4, "little"), ack_timeout=None)
         time.sleep(0.1)
+        self._dongle.send(config.group_addr, MessageType.SYNC)

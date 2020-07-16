@@ -14,6 +14,7 @@ class MessageType(Enum):
     APPOINTMENT_CLEAR = 0x04
     APPOINTMENTS_CLEAR = 0x05
     SUSPEND = 0x06
+    SYNC = 0x07
 
     STRING = 0x0e
     BUTTON = 0x0f

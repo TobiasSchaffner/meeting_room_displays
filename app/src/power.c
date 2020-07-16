@@ -7,7 +7,6 @@
 
 #include "power.h"
 #include "mesh.h"
-//#include "display.h"
 
 #include <logging/log.h>
 
@@ -45,11 +44,12 @@ static void suspend(k_timeout_t time) {
 	in_suspend = false;
 }
 
-void power_suspend(int seconds)
-{	s64_t start_time = k_uptime_get();
-
+void power_suspend(int seconds, s64_t start_time)
+{
+	int delta;
 	on_power_suspend();
-	suspend(K_MSEC(seconds * 1000 - k_uptime_delta(&start_time)));
+	delta = k_uptime_get() - start_time;
+	suspend(K_MSEC(seconds * 1000 - delta));
 	on_power_resume();
 }
 

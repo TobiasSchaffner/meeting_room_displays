@@ -51,11 +51,9 @@ class TTY(Thread):
                 buf += self._ser.read_all()
                 if not marker_found:
                     start = buf.find(MESSAGE_SERIAL_BEGIN)
-                    if (start == -1):
-                        print(buf.decode(), end='')
-                        buf = b''
-                    else:
-                        print(buf[:start].decode(), end='')
+                    if (start != -1):
+                        if start != 0:
+                            print(f"Warning: removed \"{buf[:start].decode()}\"")
                         buf = buf[start:]
                         marker_found = True
                 if marker_found and len(buf) >= MESSAGE_MIN_LEN:

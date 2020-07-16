@@ -21,6 +21,7 @@
 LOG_MODULE_REGISTER(main, LOG_LEVEL_INF);
 
 static K_SEM_DEFINE(semaphore, 0, 1);
+static s64_t start_time;
 
 void on_button_press(uint32_t button)
 {
@@ -61,7 +62,10 @@ void on_mesh_message_received(uint32_t message_type, uint16_t src_address, const
 				display_clear_appointments();
 				break;
 			case MESSAGE_SUSPEND:
-				power_suspend(*((int*) payload));
+				power_suspend(*((int*) payload), start_time);
+				break;
+			case MESSAGE_SYNC:
+				start_time = k_uptime_get();
 				break;
 			case MESSAGE_BUTTON:
 				LOG_INF("Received Button Press.");
@@ -96,6 +100,7 @@ void on_power_suspend(void)
 
 void on_power_resume(void)
 {
+	start_time = k_uptime_get();
 	display_set_status_message("Listening");
 	mesh_resume();
 	LOG_INF("Resumed");
@@ -134,5 +139,6 @@ void main(void)
 	if (!err)
 		err = power_init();
 
+	start_time = k_uptime_get();
 	k_sem_take(&semaphore, K_FOREVER);
 }

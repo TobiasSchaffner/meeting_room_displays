@@ -13,7 +13,7 @@ try:
 
         for room in displays.rooms():
             displays[room].set_events(calendar.get_events(room))
-        
+
         displays.suspend()
 
 except KeyboardInterrupt:
