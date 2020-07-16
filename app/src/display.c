@@ -21,7 +21,8 @@
 #define WINDOW_WIDTH    ((SCREEN_WIDTH - (3 * PADDING)) / 2)
 #define WINDOW_HEIGHT   (SCREEN_HEIGTH - (2 * PADDING))
 
-#define APPOINTMENT_SLOTS  16
+#define TIME_TABLE_LENGTH   10
+#define APPOINTMENT_SLOTS   16
 
 static struct device *display_dev;
 
@@ -62,8 +63,8 @@ static char calender_header_message[24] = {0};
 
 // Time Slots
 static lv_style_t style_time_slot;
-static lv_obj_t* calendar_time_slots[APPOINTMENT_SLOTS];
-static lv_obj_t* calendar_time_slot_labels[APPOINTMENT_SLOTS];
+static lv_obj_t* calendar_time_slots[TIME_TABLE_LENGTH];
+static lv_obj_t* calendar_time_slot_labels[TIME_TABLE_LENGTH];
 
 static lv_style_t style_line;
 static lv_point_t line_points[] = {{0, 0}, {305, 0}};
@@ -113,6 +114,8 @@ static void create_wallpaper(void) {
     wallpaper = lv_img_create(lv_scr_act(), NULL);
     lv_img_set_src(wallpaper, &chess);
     lv_obj_set_size(wallpaper, 800, 480);
+
+    lv_task_handler();
 }
 
 static void create_main_window() {
@@ -165,7 +168,7 @@ static void create_calendar(void) {
     lv_obj_align(calendar_header_label, NULL, LV_ALIGN_CENTER, 0, 0);
 
 
-    for (int time_slot = 0; time_slot < APPOINTMENT_SLOTS; time_slot++) {
+    for (int time_slot = 0; time_slot < TIME_TABLE_LENGTH; time_slot++) {
         calendar_time_slots[time_slot] = lv_obj_create(calendar_window, NULL);
         lv_obj_set_size(calendar_time_slots[time_slot], WINDOW_WIDTH - 4, 41);
         lv_obj_set_style(calendar_time_slots[time_slot], &style_time_slot);

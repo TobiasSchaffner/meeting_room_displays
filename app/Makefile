@@ -6,7 +6,7 @@ build-all: build-display build-relay build-dongle
 
 flash-all: flash-display flash-relay flash-dongle
 
-clean-all:
+clean:
 	rm -rf display-build
 	rm -rf relay-build
 	rm -rf dongle-build
@@ -26,7 +26,7 @@ flash-display:
 relay: build-relay flash-relay
 
 build-relay:
-	west build -b nrf52840dk_nrf52840 -d node-build -p auto . -- \
+	west build -b nrf52840dk_nrf52840 -d relay-build -p auto . -- \
 		-DOVERLAY_CONFIG="debug.conf" \
 		-DMESH_NODE_ADDR=0x030d
 
