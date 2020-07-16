@@ -9,12 +9,13 @@ battery = 1100
 changes_per_day = 20.0
 
 # Durations in hours
-duration_wake_up = 1.0 / 3600
-duration_change = 9.0 / 3600
+duration_wake_up = 4.1 / 3600
+duration_change = 12.2 / 3600
 
 # Consumption in mA
 consumption_low_power = 0.009  # 9uA
-consumption_awake = 6
+consumption_wake_up = 1.65
+consumption_update = 1.0033
 
 # Wakeup intervall in hours
 wake_up_intervall = np.array(np.arange(0, 2.0, 0.025))
@@ -36,10 +37,10 @@ abs_consumption_low_power = wake_up_intervall * consumption_low_power
 print(f"Abs consumption while in sleep: {avg_change_duration_per_cycle * 3600}s")
 
 # average changes per wakeupinterval * duration of a change * the consumption while updating
-abs_consumption_changes = avg_change_duration_per_cycle * consumption_awake
+abs_consumption_changes = avg_change_duration_per_cycle * consumption_update
 
 # the consumption while waking up and going to sleep again wihtout any updates
-abs_consumption_wakeup = duration_wake_up * consumption_awake
+abs_consumption_wakeup = duration_wake_up * consumption_wake_up
 
 # (absolute consumption in low power + average absolut consumption for update per cycle + 
 #  absolut consumption in wakup and suspend) / complete time for one cycle 
