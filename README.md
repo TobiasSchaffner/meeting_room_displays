@@ -53,6 +53,7 @@ that she can access `/dev/<tty-device>` (eg. the dongle):
 ```
 sudo usermod -a -G dialout <username>
 ```
+Do not forget to start a new terminal afterwards.
 
 ## Build
 To build one of the components use the provided make file in
@@ -63,7 +64,10 @@ E.g. to build and flash a display call:
 make display
 ```
 
-To build and flash the dongle call:
+To build and flash the dongle:
+Insert the dongle into a USB port and press the reset button. A red
+LED will light up. Then call:
 ```bash
 make dongle
 ```
+
