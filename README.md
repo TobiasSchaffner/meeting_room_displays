@@ -36,6 +36,25 @@ sudo cp meeting_room_displays/20_DiplayDongleUDev.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
+## Installing Zephyr SDK
+To install the SDK follow the steps provided in the official
+[Zephyr documentation](https://docs.zephyrproject.org/latest/getting_started/index.html).
+
+## Installing NRFUtil
+In order to flash the Nordic boards the nrfutil package is required.
+Install it via pip:
+```
+pip install nrfutil
+```
+
+## Adding the user to the dialout group
+Make sure to add the user who is working on this project to the `dialout` group so
+that she can access `/dev/<tty-device>` (eg. the dongle):
+```
+sudo usermod -a -G dialout <username>
+```
+Do not forget to start a new terminal afterwards.
+
 ## Build
 To build one of the components use the provided make file in
 meeting_room_displays/app/
@@ -45,7 +64,10 @@ E.g. to build and flash a display call:
 make display
 ```
 
-To build and flash the dongle call:
+To build and flash the dongle:
+Insert the dongle into a USB port and press the reset button. A red
+LED will light up. Then call:
 ```bash
 make dongle
 ```
+
