@@ -49,14 +49,14 @@ pip install nrfutil
 
 ## Install nrfjprog
 nrfjprog is required to flash/debug the nRF52840 development kit (in this case: the display). Download the tool 
-(here)[https://www.nordicsemi.com/Products/Development-tools/nrf-command-line-tools/download].
+[here](https://www.nordicsemi.com/Products/Development-tools/nrf-command-line-tools/download).
 Debian based systems may install the `.deb` package via
 ```
 sudo dpkg -i <nrf-debian-package-name>.deb
 ```
 
 nrfjprog requires SEGGER's JLink Software in order to run. Download the appropriate installer for
-your system (here)[https://www.segger.com/downloads/jlink].
+your system [here](https://www.segger.com/downloads/jlink).
 As in the previous step, Debian based systems may use the `.deb` and install it the same way as above.
 
 ## Adding the user to the dialout group
