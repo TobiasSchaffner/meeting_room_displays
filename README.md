@@ -40,12 +40,24 @@ sudo udevadm control --reload-rules && sudo udevadm trigger
 To install the SDK follow the steps provided in the official
 [Zephyr documentation](https://docs.zephyrproject.org/latest/getting_started/index.html).
 
-## Installing NRFUtil
-In order to flash the Nordic boards the nrfutil package is required.
+## Installing nrfutil
+In order to flash the Nordic dongle the nrfutil package is required.
 Install it via pip:
 ```
 pip install nrfutil
 ```
+
+## Install nrfjprog
+nrfjprog is required to flash/debug the nRF52840 development kit (in this case: the display). Download the tool 
+[here](https://www.nordicsemi.com/Products/Development-tools/nrf-command-line-tools/download).
+Debian based systems may install the `.deb` package via
+```
+sudo dpkg -i <nrf-debian-package-name>.deb
+```
+
+nrfjprog requires SEGGER's JLink Software in order to run. Download the appropriate installer for
+your system [here](https://www.segger.com/downloads/jlink).
+As in the previous step, Debian based systems may use the `.deb` and install it the same way as above.
 
 ## Adding the user to the dialout group
 Make sure to add the user who is working on this project to the `dialout` group so
