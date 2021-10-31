@@ -83,3 +83,8 @@ LED will light up. Then call:
 make dongle
 ```
 
+## Issues
+Sometimes the udev rule won't work and `ttyDisplayDongle` won't show up
+in `/dev/`. In that case uncomment the section at the very bottom
+in `app/Makefile`.
+
