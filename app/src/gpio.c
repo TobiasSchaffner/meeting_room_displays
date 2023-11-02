@@ -1,11 +1,3 @@
-/* microbit.c - BBC micro:bit specific hooks */
-
-/*
- * Copyright (c) 2017 Intel Corporation
- *
- * SPDX-License-Identifier: Apache-2.0
- */
-
 #include <drivers/gpio.h>
 #include <soc.h>
 #include <ctype.h>
